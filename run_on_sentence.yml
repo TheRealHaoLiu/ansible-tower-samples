@@ -1,0 +1,10 @@
+---
+- name: Paws
+  hosts: localhost
+  vars:
+    num_messages: 480
+    sleep_time: 60
+  tasks:
+    - name: Print a very long single line message
+      ansible.builtin.debug:
+        msg: "{{ '-' * 100000 }}"
