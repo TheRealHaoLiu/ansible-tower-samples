@@ -8,3 +8,6 @@
     - name: Print a very long single line message
       ansible.builtin.debug:
         msg: "{{ '-' * 100000 }}"
+    - name: Sleep for 5 minutes
+      ansible.builtin.pause:
+        seconds: 300
