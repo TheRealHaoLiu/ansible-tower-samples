@@ -1,7 +1,11 @@
-- name: Hello World Sample
-  hosts: all
+---
+- name: Paws
+  hosts: localhost
+  vars:
+    num_messages: 480
+    sleep_time: 60
   tasks:
-    - name: Hello Message
-      debug:
-        msg: "Hello World!"
-
+    - name: Lots of Paws
+      ansible.builtin.pause:
+        seconds: "{{ sleep_time }}"
+      with_sequence: "count={{ num_messages }}"
