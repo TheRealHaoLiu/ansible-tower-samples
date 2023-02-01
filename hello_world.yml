@@ -1,5 +1,6 @@
 - name: Hello World Sample
   hosts: all
+  gather_fast: false
   tasks:
     - name: Hello Message
       debug:
