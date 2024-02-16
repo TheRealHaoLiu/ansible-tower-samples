@@ -1,0 +1,17 @@
+all:
+  vars:
+    ansible_connection: local
+  hosts:
+    host1:
+      ansible_user: "host1_user"
+      # ansible_password: "password1"
+      ansible_password: !vault |
+                $ANSIBLE_VAULT;1.2;AES256;my_user
+                30333165383331656161373731376366393631623562653337313730336165383665613637393939
+                3262626537343563626565626337613663363437346439660a396537333535623437343133663162
+                62623833646238613732323130383761303961653733333766353739346331663639643632323263
+                6333323237383238660a353236373935313234356639616337613832663763333832373366653537
+                6533
+    host2:
+      ansible_user: "host2_user"
+      ansible_password: "password2_not_vaulted"

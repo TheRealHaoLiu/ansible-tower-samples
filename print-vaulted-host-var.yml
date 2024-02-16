@@ -1,6 +1,7 @@
 - name: Hello World Sample
   hosts: all
+  gather_facts: false
   tasks:
     - name: Print vault_encrypted_host_var
       debug:
-        var: vault_encrypted_host_var
+        var: ansible_password
