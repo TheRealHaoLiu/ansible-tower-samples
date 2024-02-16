@@ -1,0 +1,6 @@
+- name: Hello World Sample
+  hosts: all
+  tasks:
+    - name: Print vault_encrypted_host_var
+      debug:
+        var: vault_encrypted_host_var
