@@ -1,0 +1,11 @@
+- name: Launch demo job template on awx
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Launch job
+      awx.awx.job_launch:
+        job_template: "Demo Job Template"
+      register: job_launch
+    - name: Print job launch result
+      debug:
+        var: job_launch
