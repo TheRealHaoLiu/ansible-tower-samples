@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
+  gather_facts: false
   tasks:
-
     - name: Debug Looped
       debug:
         msg: "Iteration: {{ item }}"
