@@ -1,0 +1,28 @@
+---
+
+- name: Compare configuration after to before, ignoring Cisco-style comments
+  ansible.builtin.command: "diff -I '!' -I 'Current configuration' {{ before_file }} {{ after_file }}"
+  changed_when: false
+  register: diff_output
+  failed_when:
+    - diff_output.rc > 1
+  vars:
+    before_file: "{{ BFILE }}"
+    after_file: "{{ AFILE }}"
+
+- name: Display diff output
+  ansible.builtin.debug:
+    var: diff_output.stdout_lines
+  when: diff_output.rc == 1
+
+- name: Write diff output to file
+  ansible.builtin.copy:
+    content: "{{ diff_output.stdout }}"
+    dest: "{{ DFILE }}"
+  when: diff_output.rc == 1
+
+- name: Write "no diff" to file
+  ansible.builtin.copy:
+    content: "no diff"
+    dest: "{{ DFILE }}"
+  when: diff_output.rc == 0

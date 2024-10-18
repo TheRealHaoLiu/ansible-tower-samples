@@ -1,0 +1,71 @@
+- name: Standard behavior block
+  when: not COMMAND_STUB
+  block:
+
+    - name: Ensure directory for report exists
+      ansible.builtin.file:
+        path: "{{ host_report_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Ping all of the switches from localhost
+      ansible.builtin.shell: "ping -c 5 {{ ansible_host }}"
+      register: net_ping_result
+      delegate_to: localhost
+
+    - name: Debug ping output
+      ansible.builtin.debug:
+        msg: "{{ net_ping_result }}"
+        verbosity: 2
+
+    - name: Assert pings were successful
+      ansible.builtin.assert:
+        that:
+          # Lost a maximum of one packet
+          - "net_ping_result.stdout is search('[4-5] received')"
+        fail_msg: "Ping failed to {{ ansible_host }}"
+        success_msg: "Ping succeeded to {{ ansible_host }}"
+
+    - name: Put ping success in report
+      ansible.builtin.shell: |
+        echo "    ping_{{ save_string }}: success" >> {{ host_report_path }}/{{ yaml_report_name }}
+      tags:
+        - do_local_pings
+
+  rescue:
+
+    - name: Put ping failure in report
+      ansible.builtin.shell: |
+        echo "    ping_{{ save_string }}: failed" >> {{ host_report_path }}/{{ yaml_report_name }}
+      tags:
+        - do_local_pings
+
+    - name: Fail the play
+      ansible.builtin.meta: end_host
+
+  always:
+
+    - name: Output data to file
+      ansible.builtin.copy:
+        content: "{{ net_ping_result.stdout }}"
+        dest: "{{ host_data_path }}/{{ ansible_host }}.ping.{{ save_string }}.txt"
+        mode: '0644'
+
+- name: Stub behavior block
+  when: COMMAND_STUB
+  block:
+
+    - name: Copy stub data to host_data_path directory
+      ansible.builtin.copy:
+        src: "{{ stub_data_path }}/{{ ansible_host }}.ping.stub.txt"
+        dest: "{{ host_data_path }}/{{ ansible_host }}.ping.{{ save_string }}.txt"
+        mode: '0644'
+
+    - name: Debug stub data
+      ansible.builtin.debug:
+        msg: "Stub ping success"
+        verbosity: 1
+
+    - name: Put ping success in report
+      ansible.builtin.shell: |
+        echo "    ping_{{ save_string }}: stub" >> {{ host_report_path }}/{{ yaml_report_name }}

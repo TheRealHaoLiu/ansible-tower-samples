@@ -1,0 +1,4 @@
+---
+
+plugin: git_inventory_plugin.py
+csv_url_prefix: https://git.marriott.com/raw/Network-DevOps/devops_inventory_seed/development

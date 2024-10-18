@@ -1,0 +1,8 @@
+INSTANCE: 1 # override with -e INSTANCE=2
+INVENTORY_NAME: "deflatten_networks_git_inventory-{{ INSTANCE }}"
+JOB_TEMPLATE: "deflatten_networks-template-with_inventory-{{ INSTANCE }}"
+POLL_RETRIES: 60
+POLL_DELAY: 10
+MINUTES: |
+  {% set minutes = (POLL_RETRIES * POLL_DELAY) / 60 %}
+  {{ minutes | int }}

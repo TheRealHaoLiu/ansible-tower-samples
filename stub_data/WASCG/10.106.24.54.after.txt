@@ -1,0 +1,70 @@
+Running configuration:
+
+; J9776A Configuration Editor; Created on release #YA.16.10.0016
+; Ver #14:41.44.00.04.19.02.13.98.82.34.61.18.28.f3.84.9c.63.ff.37.27:05
+hostname "WASCGS01"
+console idle-timeout 900
+console idle-timeout serial-usb 900
+banner motd
+ "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n! This
+ system, which includes the data stored herein, is      !\n! proprietary and
+ confidential to Marriott International, Inc.!\n!(Marriott). This system is for
+ Marriott authorized personnel !\n! only. Unauthorized access is prohibited and
+ will be         !\n! prosecuted to the full extent of applicable law.         
+   !\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "
+logging 162.130.146.34
+timesync sntp
+sntp unicast
+sntp server priority 1 162.130.132.124
+no stack
+tacacs-server host 162.130.146.67 key "default"
+tacacs-server host 10.224.254.56 key "default"
+no telnet-server
+time daylight-time-rule continental-us-and-canada
+time timezone -300
+no web-management
+ip default-gateway 10.106.24.1
+ip ssh filetransfer
+no ip ssh cipher aes128-cbc
+no ip ssh cipher 3des-cbc
+no ip ssh cipher aes192-cbc
+no ip ssh cipher aes256-cbc
+no ip ssh cipher rijndael-cbc@lysator.liu.se
+interface 13
+   name "CL-LAN:WASCGS02:1:[SWITCH]"
+   exit
+interface 16
+   name "CL-LAN:WASCGS03:1:[SWITCH]"
+   exit
+snmp-server community "PD6TE9RW" operator unrestricted
+snmp-server community "FZQ6cmRO" operator
+snmp-server host 162.130.104.16 community "FZQ6cmRO" trap-level critical
+snmp-server host 162.130.148.144 community "PD6TE9RW" trap-level critical
+snmp-server host 162.130.146.60 community "PD6TE9RW" trap-level critical
+snmp-server host 10.224.10.70 community "PD6TE9RW" trap-level critical
+snmp-server enable traps mac-notify
+snmp-server contact "v3.1" location "Telco Room behind front desk"
+aaa accounting commands stop-only tacacs
+aaa accounting exec start-stop tacacs
+aaa accounting system start-stop tacacs
+aaa authorization commands tacacs
+aaa authentication login privilege-mode
+aaa authentication console login tacacs
+aaa authentication ssh login tacacs
+vlan 1
+   name "DEFAULT_VLAN"
+   untagged 1-28
+   ip address 10.106.24.54 255.255.254.0
+   exit
+vlan 399
+   name "VLAN399"
+   tagged 13,16
+   no ip address
+   exit
+no tftp client
+no tftp server
+loop-protect 1-28
+no dhcp config-file-update
+no dhcp image-file-update
+no dhcp tr69-acs-url
+password manager

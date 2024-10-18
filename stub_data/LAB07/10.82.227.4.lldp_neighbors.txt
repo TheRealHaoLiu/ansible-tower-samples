@@ -1,0 +1,20 @@
+LLDP Neighbor Information 
+=========================
+
+Total Neighbor Entries          : 10
+Total Neighbor Entries Deleted  : 6944
+Total Neighbor Entries Dropped  : 0
+Total Neighbor Entries Aged-Out : 6944
+
+LOCAL-PORT  CHASSIS-ID         PORT-ID                      PORT-DESC                    TTL      SYS-NAME    
+-----------------------------------------------------------------------------------------------------------
+1/1/1       a4:0e:75:c6:d0:40  1/1/2                        CL-LAN:10.82.227.4.LAB07:1/1/1:[...  120      10.82.227.2.LAB07                          
+1/1/7       e8:80:88:a3:c6:21  e8:80:88:a3:c6:21                                         3601                                        
+1/1/8       9c:2d:cd:b2:ec:3e  9c:2d:cd:b2:ec:3e                                         3601                                        
+1/1/13      e8:80:88:20:8e:c1  e8:80:88:20:8e:c1                                         3601                                        
+1/1/15      e8:80:88:23:57:ec  e8:80:88:23:57:ec                                         3601                                        
+1/1/17      e8:80:88:a3:c1:e8  e8:80:88:a3:c1:e8                                         3601                                        
+1/1/21      e8:80:88:24:84:f1  e8:80:88:24:84:f1                                         3601                                        
+1/1/28      48:2a:e3:fd:d3:c8  48:2a:e3:fd:d3:c8                                         3601                                        
+1/1/45      e8:80:88:16:ce:e4  e8:80:88:16:ce:e4                                         3601                                        
+1/1/48      f8:ce:72:14:ac:be  f8:ce:72:14:ac:be                                         3601

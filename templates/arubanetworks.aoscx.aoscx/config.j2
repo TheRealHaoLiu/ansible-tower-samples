@@ -1,0 +1,12 @@
+#jinja2: lstrip_blocks: True
+vlan {{ vlan_id }}
+
+{% for interface in interface_data %}
+    {% set local_port = interface.INTERFACE if interface.INTERFACE else None %}
+    {% set vlan_access = interface.VLAN_ACCESS if interface.VLAN_ACCESS else None %}
+    {% if local_port and vlan_access %}
+interface {{ local_port }}
+    vlan trunk native {{ vlan_access }}
+
+    {% endif %}
+{% endfor %}

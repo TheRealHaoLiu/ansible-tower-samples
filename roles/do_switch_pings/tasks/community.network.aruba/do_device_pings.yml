@@ -1,0 +1,18 @@
+# ATLPOS01# ping 10.34.64.52
+#
+# 10.34.64.52 is alive, time = 24 ms
+
+- name: Ping all of the other hosts (AOS)
+  when: ansible_network_os == "community.network.aruba"
+  community.network.aruba_command:
+    commands:
+      - "ping {{ hostvars[item]['ansible_host'] }} repetitions 5"
+  loop: "{{ groups[group_names[0]] }}"
+  when:
+    - hostvars[item].ansible_host != ansible_host
+    - not COMMAND_STUB
+  register: aos_ping_output
+
+- name: Set a common variable for the ping output
+  ansible.builtin.set_fact:
+    ping_output: "{{ aos_ping_output }}"

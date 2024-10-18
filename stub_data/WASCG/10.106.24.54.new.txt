@@ -1,0 +1,7 @@
+vlan 399
+tagged 16,13
+interface 16
+name CL-LAN:WASCGS03:1:[SWITCH]
+interface 13
+name CL-LAN:WASCGS02:1:[SWITCH]
+end

@@ -1,0 +1,33 @@
+Interface 1/1/48 is up 
+ Admin state is up
+ Link state: up for 1 day (since Wed Aug 14 14:25:40 EDT 2024)
+ Link transitions: 1
+ Description: CL-LAN:BOSPBS051:1/1/1:[SWITCH]
+ Hardware: Ethernet, MAC Address: a4:0e:75:e1:0f:52 
+ MTU 1500 
+ Type 1GbT
+ Full-duplex 
+ qos trust none
+ Speed 1000 Mb/s 
+ Auto-negotiation is on
+ Energy-Efficient Ethernet is disabled
+ Flow-control: off 
+ Error-control: off 
+ MDI mode: MDIX 
+ VLAN Mode: native-untagged
+ Native VLAN: 1
+ Allowed VLAN List: 1,399
+ Rx
+      4313835 total packets           1165882250 total bytes
+      4238138   unicast packets
+        64332   multicast packets
+        11365   broadcast packets
+            0 errors                           0 dropped
+            0 CRC/FCS                          0 pause
+ Tx
+      5275086 total packets           3986838998 total bytes
+      4901830   unicast packets
+       192187   multicast packets
+       181069   broadcast packets
+            0 errors                           0 dropped
+            0 collision                        0 pause

@@ -1,0 +1,8 @@
+vlan 399
+exit
+!
+interface 1/1/10
+description UPLINK:IADFOS52:1/1/2:[UPLINK]
+vlan trunk allowed 1,399
+!
+end

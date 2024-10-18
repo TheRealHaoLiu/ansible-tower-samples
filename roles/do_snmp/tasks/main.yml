@@ -1,0 +1,33 @@
+- name: Get SNMP Information from mod module
+  snmp_facts_mod:
+    host: "{{ ansible_host }}"
+    version: v2c
+    community: "{{ SNMP_CREDS[RUNMODE] }}"
+  delegate_to: localhost
+  register: snmp_facts
+  when: not SNMP_STUB
+
+- name: Set SNMP discovered sysname
+  ansible.builtin.set_fact:
+    sysname: "{{ snmp_facts.ansible_facts.ansible_sysname | string }}"
+    sysdescr: "{{ snmp_facts.ansible_facts.ansible_sysdescr | string }}"
+    lldpLocSysDesc: "{{ snmp_facts.ansible_facts.ansible_lldpLocSysDesc | string }}"
+  when: not SNMP_STUB
+
+- name: Set Stub sysname
+  ansible.builtin.include_vars:
+    file: "{{ stub_data_file_path }}"
+  vars:
+    stub_filename: "{{ ansible_host }}.snmp.yml"
+    stub_location_1: "{{ stub_data_path }}/{{ stub_filename }}"
+    stub_location_2: "stub_data/snmp/{{ stub_filename }}"
+    stub_location_1_exists: "{{ lookup('file', stub_location_1, errors='ignore') is not none }}"
+    stub_data_file_path: "{{ stub_location_1 if stub_location_1_exists else stub_location_2 }}"
+  when: SNMP_STUB
+
+- name: Debug
+  debug:
+    msg:
+      - "sysname: {{ sysname }}"
+      - "sysdescr: {{ sysdescr }}"
+      - "lldpLocSysDesc: {{ lldpLocSysDesc }}"

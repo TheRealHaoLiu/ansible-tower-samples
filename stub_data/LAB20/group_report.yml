@@ -1,0 +1,45 @@
+switches:
+  - switch_ip: 10.96.36.45
+    date: 2024-08-16 14:13:27
+    marsha: BOSPB
+    project: pilot1-1_BOSPB
+    ping_before: success
+    snmp: success
+    switch_name: 10.82.227.2.LAB20
+    switch_os: arubanetworks.aoscx.aoscx
+    ping_after_lldp: success
+    ping_after_part_1_config: success
+    ping_after_part_2_config: success
+  - switch_ip: 10.96.36.46
+    date: 2024-08-16 14:13:27
+    marsha: BOSPB
+    project: pilot1-1_BOSPB
+    ping_before: success
+    snmp: success
+    switch_name: 10.82.227.4.LAB20
+    switch_os: arubanetworks.aoscx.aoscx
+    ping_after_lldp: success
+    ping_after_part_1_config: success
+    ping_after_part_2_config: success
+  - switch_ip: 10.96.36.47
+    date: 2024-08-16 14:13:27
+    marsha: BOSPB
+    project: pilot1-1_BOSPB
+    ping_before: success
+    snmp: success
+    switch_name: 10.82.227.5.LAB20
+    switch_os: arubanetworks.aoscx.aoscx
+    ping_after_lldp: success
+    ping_after_part_1_config: success
+    ping_after_part_2_config: success
+  - switch_ip: 10.96.36.51
+    date: 2024-08-16 14:13:27
+    marsha: BOSPB
+    project: pilot1-1_BOSPB
+    ping_before: success
+    snmp: success
+    switch_name: BOSPBS051
+    switch_os: arubanetworks.aoscx.aoscx
+    ping_after_lldp: success
+    ping_after_part_1_config: success
+    ping_after_part_2_config: success

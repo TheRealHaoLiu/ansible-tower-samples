@@ -1,0 +1,33 @@
+Interface 1/1/1 is up 
+ Admin state is up
+ Link state: up for 1 year (since Sun Aug 20 07:36:53 EDT 2023)
+ Link transitions: 1
+ Description: CL-LAN:10.82.227.2.LAB11:1/1/2:[SWITCH]
+ Hardware: Ethernet, MAC Address: a4:0e:75:cb:68:3f 
+ MTU 1500 
+ Type 1GbT
+ Full-duplex 
+ qos trust none
+ Speed 1000 Mb/s 
+ Auto-negotiation is on
+ Energy-Efficient Ethernet is disabled
+ Flow-control: off 
+ Error-control: off 
+ MDI mode: MDI 
+ VLAN Mode: native-untagged
+ Native VLAN: 1
+ Allowed VLAN List: 1,399
+ Rx
+   9634476223 total packets        6937687671536 total bytes
+   9465439831   unicast packets
+     64038518   multicast packets
+    104997874   broadcast packets
+            0 errors                           0 dropped
+            0 CRC/FCS                          0 pause
+ Tx
+   9888054243 total packets       10058105478902 total bytes
+   9863054307   unicast packets
+     13297210   multicast packets
+     11702726   broadcast packets
+            0 errors                       22732 dropped
+            0 collision                        0 pause

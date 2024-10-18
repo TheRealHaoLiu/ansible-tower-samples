@@ -1,0 +1,4 @@
+date,project,switch_ip,switch_name,switch_os,marsha,ping_before,snmp,ping_after_lldp,ping_after,interfaces,reload_timer_set,reload_timer_cancelled
+2024-08-15 21:03:19,test-WASCG,10.106.24.52,WASCGS02,community.network.aruba,WASCG,success,success,no_data,no_data,no_data,no_data,no_data
+2024-08-15 21:03:19,test-WASCG,10.106.24.53,WASCGS03,community.network.aruba,WASCG,success,success,success,no_data,no_data,no_data,no_data
+2024-08-15 21:03:19,test-WASCG,10.106.24.54,WASCGS01,community.network.aruba,WASCG,success,success,success,no_data,no_data,no_data,no_data

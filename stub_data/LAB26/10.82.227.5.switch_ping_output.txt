@@ -1,0 +1,145 @@
+changed: false
+msg: All items completed
+results:
+-   ansible_loop_var: item
+    changed: false
+    false_condition: hostvars[item].ansible_host != ansible_host
+    item: 10.82.227.5.LAB26
+    skip_reason: Conditional result was False
+    skipped: true
+-   ansible_loop_var: item
+    changed: false
+    failed: false
+    invocation:
+        module_args:
+            commands:
+            - ping 10.96.36.45 repetitions 5
+            interval: 1
+            match: all
+            output_file: null
+            output_file_format: json
+            provider: null
+            retries: 10
+            wait_for: null
+    item: 10.82.227.2.LAB26
+    stdout:
+    - 'PING 10.96.36.45 (10.96.36.45) 100(128) bytes of data.
+
+        108 bytes from 10.96.36.45: icmp_seq=1 ttl=64 time=0.155 ms
+
+        108 bytes from 10.96.36.45: icmp_seq=2 ttl=64 time=0.183 ms
+
+        108 bytes from 10.96.36.45: icmp_seq=3 ttl=64 time=0.449 ms
+
+        108 bytes from 10.96.36.45: icmp_seq=4 ttl=64 time=0.169 ms
+
+        108 bytes from 10.96.36.45: icmp_seq=5 ttl=64 time=0.151 ms
+
+
+        --- 10.96.36.45 ping statistics ---
+
+        5 packets transmitted, 5 received, 0% packet loss, time 4094ms
+
+        rtt min/avg/max/mdev = 0.151/0.221/0.449/0.115 ms'
+    stdout_lines:
+    -   - PING 10.96.36.45 (10.96.36.45) 100(128) bytes of data.
+        - '108 bytes from 10.96.36.45: icmp_seq=1 ttl=64 time=0.155 ms'
+        - '108 bytes from 10.96.36.45: icmp_seq=2 ttl=64 time=0.183 ms'
+        - '108 bytes from 10.96.36.45: icmp_seq=3 ttl=64 time=0.449 ms'
+        - '108 bytes from 10.96.36.45: icmp_seq=4 ttl=64 time=0.169 ms'
+        - '108 bytes from 10.96.36.45: icmp_seq=5 ttl=64 time=0.151 ms'
+        - ''
+        - '--- 10.96.36.45 ping statistics ---'
+        - 5 packets transmitted, 5 received, 0% packet loss, time 4094ms
+        - rtt min/avg/max/mdev = 0.151/0.221/0.449/0.115 ms
+-   ansible_loop_var: item
+    changed: false
+    failed: false
+    invocation:
+        module_args:
+            commands:
+            - ping 10.96.36.51 repetitions 5
+            interval: 1
+            match: all
+            output_file: null
+            output_file_format: json
+            provider: null
+            retries: 10
+            wait_for: null
+    item: BOSPBS051
+    stdout:
+    - 'PING 10.96.36.51 (10.96.36.51) 100(128) bytes of data.
+
+        108 bytes from 10.96.36.51: icmp_seq=1 ttl=64 time=0.201 ms
+
+        108 bytes from 10.96.36.51: icmp_seq=2 ttl=64 time=0.176 ms
+
+        108 bytes from 10.96.36.51: icmp_seq=3 ttl=64 time=0.182 ms
+
+        108 bytes from 10.96.36.51: icmp_seq=4 ttl=64 time=0.182 ms
+
+        108 bytes from 10.96.36.51: icmp_seq=5 ttl=64 time=0.198 ms
+
+
+        --- 10.96.36.51 ping statistics ---
+
+        5 packets transmitted, 5 received, 0% packet loss, time 4089ms
+
+        rtt min/avg/max/mdev = 0.176/0.187/0.201/0.019 ms'
+    stdout_lines:
+    -   - PING 10.96.36.51 (10.96.36.51) 100(128) bytes of data.
+        - '108 bytes from 10.96.36.51: icmp_seq=1 ttl=64 time=0.201 ms'
+        - '108 bytes from 10.96.36.51: icmp_seq=2 ttl=64 time=0.176 ms'
+        - '108 bytes from 10.96.36.51: icmp_seq=3 ttl=64 time=0.182 ms'
+        - '108 bytes from 10.96.36.51: icmp_seq=4 ttl=64 time=0.182 ms'
+        - '108 bytes from 10.96.36.51: icmp_seq=5 ttl=64 time=0.198 ms'
+        - ''
+        - '--- 10.96.36.51 ping statistics ---'
+        - 5 packets transmitted, 5 received, 0% packet loss, time 4089ms
+        - rtt min/avg/max/mdev = 0.176/0.187/0.201/0.019 ms
+-   ansible_loop_var: item
+    changed: false
+    failed: false
+    invocation:
+        module_args:
+            commands:
+            - ping 10.96.36.46 repetitions 5
+            interval: 1
+            match: all
+            output_file: null
+            output_file_format: json
+            provider: null
+            retries: 10
+            wait_for: null
+    item: 10.82.227.4.LAB26
+    stdout:
+    - 'PING 10.96.36.46 (10.96.36.46) 100(128) bytes of data.
+
+        108 bytes from 10.96.36.46: icmp_seq=1 ttl=64 time=0.188 ms
+
+        108 bytes from 10.96.36.46: icmp_seq=2 ttl=64 time=0.193 ms
+
+        108 bytes from 10.96.36.46: icmp_seq=3 ttl=64 time=0.198 ms
+
+        108 bytes from 10.96.36.46: icmp_seq=4 ttl=64 time=0.194 ms
+
+        108 bytes from 10.96.36.46: icmp_seq=5 ttl=64 time=0.196 ms
+
+
+        --- 10.96.36.46 ping statistics ---
+
+        5 packets transmitted, 5 received, 0% packet loss, time 4076ms
+
+        rtt min/avg/max/mdev = 0.188/0.193/0.198/0.017 ms'
+    stdout_lines:
+    -   - PING 10.96.36.46 (10.96.36.46) 100(128) bytes of data.
+        - '108 bytes from 10.96.36.46: icmp_seq=1 ttl=64 time=0.188 ms'
+        - '108 bytes from 10.96.36.46: icmp_seq=2 ttl=64 time=0.193 ms'
+        - '108 bytes from 10.96.36.46: icmp_seq=3 ttl=64 time=0.198 ms'
+        - '108 bytes from 10.96.36.46: icmp_seq=4 ttl=64 time=0.194 ms'
+        - '108 bytes from 10.96.36.46: icmp_seq=5 ttl=64 time=0.196 ms'
+        - ''
+        - '--- 10.96.36.46 ping statistics ---'
+        - 5 packets transmitted, 5 received, 0% packet loss, time 4076ms
+        - rtt min/avg/max/mdev = 0.188/0.193/0.198/0.017 ms
+skipped: false

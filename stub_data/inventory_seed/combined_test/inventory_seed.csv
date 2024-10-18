@@ -1,0 +1,8 @@
+marsha,HP,Owner Type,Contienent,FS-NetMRI-Data.Connectivity,device_ip,FS-NetMRI-Data.MAC Address,FS-NetMRI-Data.Vendor and Model,Device Name,Comment,do_not_config
+BOSPB,4,M,US Canada,Online,10.96.36.45,A4:0E:75:C6:D0:40,HP Switch-Router 6200 JL727A ML.10.06.0101,BOSPBS045,Core,
+BOSPB,4,M,US Canada,Online,10.96.36.46,A4:0E:75:CB:68:00,HP Switch-Router 6200 JL727A ML.10.06.0101,BOSPBS046,Edge 1/1/1 to Core 1/1/2,
+BOSPB,4,M,US Canada,Online,10.96.36.47,A4:0E:75:E1:0F:40,HP Switch-Router 6200 JL727A ML.10.06.0101,BOSPBS047,Edge 1/1/1 to Core 1/1/4,
+BOSPB,4,M,US Canada,Online,10.96.36.51,44:5B:ED:3B:3E:00,HP Switch-Router 6200 JL727A ML.10.06.0101,BOSPBS051,Edge1/1/1 to Edge S47 1/1/4,
+WASCG,6,M,US Canada,Online,10.106.24.52,00:15:60:6B:97:80,HP Switch 2524 J4813A F.05.80,WASCGS02,,
+WASCG,6,M,US Canada,Online,10.106.24.53,08:F1:EA:44:65:C0,HP Switch 2530 J9782A YB.16.10.0016,WASCGS03,,
+WASCG,6,M,US Canada,Online,10.106.24.54,90:20:C2:A2:90:C0,HP Switch 2530 J9776A YA.16.10.0016,WASCGS01,,TRUE

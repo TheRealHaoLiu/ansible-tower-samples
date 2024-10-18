@@ -1,0 +1,4 @@
+---
+
+- name: Get templates dir from Marriott Github
+  ansible.builtin.import_tasks: get_templates_dir_from_github.yml

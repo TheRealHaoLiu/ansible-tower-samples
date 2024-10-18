@@ -1,0 +1,8 @@
+﻿marsha,HP,Owner Type,Contienent,FS-NetMRI-Data.Connectivity,device_ip,FS-NetMRI-Data.MAC Address,FS-NetMRI-Data.Vendor and Model
+ATLPO,2,M,US Canada,Online,10.34.64.51,20677cab1820,HPE Switch 2530
+ATLPO,2,M,US Canada,Online,10.34.64.52,20677cabbee0,HPE Switch 2530
+ATLGI,2,M,US Canada,Online,10.123.164.51,64e881d4e0c0,Aruba CX 6200
+ATLGI,2,M,US Canada,Online,10.123.164.52,9020c2a20f40,HPE Switch 2530
+ATLAB,3,M,US Canada,Online,10.119.104.51,0c975f925980,Aruba CX 6200
+ATLAB,3,M,US Canada,Online,10.119.104.52,98f2b359b950,HPE Switch 2530
+ATLAB,3,M,US Canada,Online,10.119.104.53,98f2b359ca50,HPE Switch 2530

@@ -1,0 +1,35 @@
+- name: Cancel reload
+  community.network.aruba_command:
+    commands:
+      - "no reload"
+
+- name: Show reload cancelled
+  community.network.aruba_command:
+    commands:
+      - "show reload after"
+  register: aos_cancel_output
+  ignore_errors: yes
+
+- name: Debug aos_cancel_output
+  ansible.builtin.debug:
+    var: aos_cancel_output
+    verbosity: 2
+  ignore_errors: yes
+
+- name: Warning when command fails
+  debug:
+    msg: "Warning command on {{ inventory_hostname }} was not accepted"
+  when: "aos_cancel_output.failed"
+
+- name: Verify that reload is cancelled
+  ansible.builtin.assert:
+    that:
+      - "aos_cancel_output.get('stdout') is search(match_string) or aos_cancel_output.failed"
+    fail_msg: "Reload not cancelled"
+    success_msg: "Reload cancelled"
+  vars:
+    match_string: "reload is not scheduled"
+
+- name: INFO that device reload is cancelled
+  ansible.builtin.debug:
+    msg: "INFO: Device reload has been cancelled"

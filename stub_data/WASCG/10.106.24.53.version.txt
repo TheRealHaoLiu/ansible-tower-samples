@@ -1,0 +1,9 @@
+Image stamp:   
+ /ws/swbuildm/rel_ajanta_qaoff/code/build/ponds(swbuildm_rel_ajanta_qaoff_rel_aj
+anta)
+                Aug  4 2021 00:19:33
+                YB.16.10.0016
+                75
+Boot Image:     Primary
+
+Boot ROM Version:    YB.15.10

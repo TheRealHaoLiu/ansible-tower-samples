@@ -1,0 +1,144 @@
+---
+# Used as part of AAP workflow.
+
+- name: Include test vars
+  ansible.builtin.include_vars: inv_test.yml
+  when: RUNMODE == 'dev' and 'test' in ansible_run_tags
+
+- name: Debug GH_FOLDER
+  ansible.builtin.debug:
+    var: GH_FOLDER
+    verbosity: 1
+
+- name: Verify inventory exists
+  awx.awx.inventory:
+    name: "{{ INVENTORY_NAME }}"
+    description: "Switches to be configured"
+    organization: MiND
+    state: present
+    controller_host: "{{ TOWER_SERVER[RUNMODE] }}"
+    controller_oauthtoken: "{{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+  register: inventory_output
+
+- name: Debug inventory_output
+  ansible.builtin.debug:
+    var: inventory_output
+    verbosity: 1
+
+- name: Delete existing inventory source if any
+  awx.awx.inventory_source:
+    name: "{{ INVENTORY_NAME }}-source"
+    inventory: "{{ inventory_output.id }}"
+    state: absent
+    controller_host: "{{ TOWER_SERVER[RUNMODE] }}"
+    controller_oauthtoken: "{{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+  register: delete_source_output
+  ignore_errors: yes
+
+- name: Debug delete_output
+  ansible.builtin.debug:
+    var: delete_source_output
+    verbosity: 1
+
+- name: Add new source to inventory
+  awx.awx.inventory_source:
+    name: "{{ INVENTORY_NAME }}-source"
+    description: "Switches to be configured"
+    inventory: "{{ INVENTORY_NAME }}"
+    source: "scm"
+    # TODO - change to deflatten_networks-project
+    source_project: "deflatten_networks-project-with-inventory"
+    source_path: "inventory_plugins/git_inventory_plugin.yml"
+    overwrite: true
+    execution_environment: "deflatten_networks-ee"
+    overwrite_vars: false
+    credential: ndo_github_env_token
+    # update_on_launch: true
+    state: present
+    controller_host: "{{ TOWER_SERVER[RUNMODE] }}"
+    controller_oauthtoken: "{{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+    source_vars:
+      GH_FOLDER: "{{ GH_FOLDER }}"
+  register: source_output
+
+- name: Debug source_output
+  ansible.builtin.debug:
+    var: source_output
+    verbosity: 1
+
+- name: Sync inventory
+  ansible.builtin.uri:
+    url: "https://{{ TOWER_SERVER[RUNMODE] }}/api/v2/inventories/{{ inventory_output.id }}/update_inventory_sources/"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+  register: sync_output
+
+- name: Verify success of inventory source (polling for {{ MINUTES }} minutes)
+  ansible.builtin.uri:
+    url: "https://{{ TOWER_SERVER[RUNMODE] }}/api/v2/inventory_sources/{{ source_output.id }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+  register: poll_output
+  until: poll_output.json.status == "successful"
+  retries: "{{ POLL_RETRIES }}"
+  delay: "{{ POLL_DELAY }}"
+  failed_when: poll_output.json.status in ("failed", "error", "cancelled")
+
+- name: Debug poll_output
+  ansible.builtin.debug:
+    var: poll_output
+    verbosity: 1
+
+# Verify job template exists
+- name: Verify job template exists
+  awx.awx.job_template:
+    name: "{{ JOB_TEMPLATE }}"
+    controller_host: "{{ TOWER_SERVER[RUNMODE] }}"
+    controller_oauthtoken: "{{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+    state: exists
+  register: job_template_output
+
+- name: Debug job_template_output
+  ansible.builtin.debug:
+    var: job_template_output
+    verbosity: 1
+
+# Verify inventory is on template
+- name: Verify inventory in job template
+  awx.awx.job_template:
+    name: "{{ JOB_TEMPLATE }}"
+    inventory: "{{ inventory_output.id }}"
+    controller_host: "{{ TOWER_SERVER[RUNMODE] }}"
+    controller_oauthtoken: "{{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+  register: job_template_inventory_output
+
+- name: Get job template data
+  ansible.builtin.uri:
+    url: "https://{{ TOWER_SERVER[RUNMODE] }}/api/v2/job_templates/{{ job_template_output.id }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ TOWER_OAUTH[RUNMODE] }}"
+    validate_certs: false
+  register: job_template_poll_output
+
+- name: Debug job_template_poll_output
+  ansible.builtin.debug:
+    var: job_template_poll_output
+    verbosity: 1
+
+- name: Assert that inventory attached to job template is the same as inventory verified
+  ansible.builtin.assert:
+    that:
+      - "'inventory' in job_template_poll_output.json"
+      - job_template_poll_output.json.inventory == inventory_output.id
+    success_msg: "Inventory attached to job template is the same as inventory verified"
+    fail_msg: "Inventory attached to job template is not the same as inventory verified"

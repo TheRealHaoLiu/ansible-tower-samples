@@ -1,0 +1,25 @@
+---
+
+- name: Get switch command block
+  block:
+
+    - name: Get switch command
+      ansible.builtin.include_tasks: "{{ ansible_network_os }}/get_device_command.yml"
+
+  rescue:
+
+    - name: Put failure_reason in report
+      ansible.builtin.shell: |
+        echo "    failure_reason: get_device_command_failed" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+    - name: Put success=false in report
+      ansible.builtin.shell: |
+        echo "    success: false" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+    - name: Set success flag and failure_reason
+      ansible.builtin.set_fact:
+        success: false
+        failure_reason: get_device_command_failed
+
+    - name: Fail the play
+      ansible.builtin.meta: end_host

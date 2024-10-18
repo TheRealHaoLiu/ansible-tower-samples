@@ -1,0 +1,51 @@
+---
+
+- name: Write configs block
+  when: not TESTWRITE
+  block:
+
+  # TODO: Uncomment when the aoscx_config module is fixed
+  # - name: Write switch configs
+  #   ansible.builtin.include_tasks: "{{ ansible_network_os }}/write_device_config.yml"
+  #   when: "not SAVE_CONFIG | default(false)"
+  # - name: Save switch configs
+  #   ansible.builtin.include_tasks: "{{ ansible_network_os }}/save_device_config.yml"
+  #   when: "SAVE_CONFIG | default(false)"
+
+  - name: Write switch configs
+    ansible.builtin.include_tasks: "community.network.aruba/write_device_config.yml"
+    when: "not SAVE_CONFIG | default(false)"
+
+  - name: Save switch configs
+    ansible.builtin.include_tasks: "community.network.aruba/save_device_config.yml"
+    when: "SAVE_CONFIG | default(false)"
+
+  rescue:
+
+    - name: Put failure_reason in report
+      ansible.builtin.shell: |
+        echo "    failure_reason: write_configs_failed" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+    - name: Put success=false in report
+      ansible.builtin.shell: |
+        echo "    success: false" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+    - name: Set success flag and failure_reason
+      ansible.builtin.set_fact:
+        success: false
+        failure_reason: write_configs_failed
+
+    - name: Fail the play
+      ansible.builtin.meta: end_host
+
+- name: Pseudo-write configs block
+  when: TESTWRITE
+  block:
+
+  - name: Pseudo-write switch configs
+    ansible.builtin.include_tasks: "community.network.aruba/pseudo-write_device_config.yml"
+    when: "not SAVE_CONFIG | default(false)"
+
+  - name: Pseudo-save switch configs
+    ansible.builtin.include_tasks: "community.network.aruba/pseudo-save_device_config.yml"
+    when: "SAVE_CONFIG | default(false)"

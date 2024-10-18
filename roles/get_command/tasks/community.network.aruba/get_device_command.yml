@@ -1,0 +1,66 @@
+- name: Standard behavior block
+  block:
+
+    - name: Run commands on remote devices - Aruba (Procurve)
+      community.network.aruba_command:
+        commands:
+          - "{{ device_command }}"
+      register: aos_output
+      until:
+        - "'stdout' in aos_output"
+        - "aos_output.stdout[0] | length > 0"
+        - "aos_output.stdout[0] != 'None'"
+      retries: 5
+      delay: 5
+
+    - name: Verify output is not just an ssh failed message
+      ansible.builtin.assert:
+        that:
+          - not ("ssh connection failed" in aos_output.stdout[0])
+        fail_msg: "Connection failed. Aborting."
+        success_msg: "Connection succeeded"
+
+  when: not COMMAND_STUB
+
+- name: Stub behavior block
+  block:
+
+    - name: Get stub data
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/stub_data/{{ group_names[0] }}/{{ ansible_host }}.{{ save_string }}"
+      register: stub_data
+
+    - name: Set stub data to variable
+      set_fact:
+        aos_output:
+          stdout:
+            - "{{ stub_data['content'] | b64decode }}"
+          stdout_lines:
+            - "{{ stub_data['content'] | b64decode | split('\n') }}"
+
+  when: COMMAND_STUB
+
+- name: Final block
+  block:
+
+    - name: Command Output - AOS
+      ansible.builtin.debug:
+        msg: "{{ aos_output.stdout_lines }}"
+        verbosity: 1
+
+    - name: Save a variable
+      set_fact:
+        last_command_stdout: "{{ aos_output.stdout[0] }}"
+        last_command_stdout_lines: "{{ aos_output.stdout_lines[0] }}"
+
+    - name: Ensure output directory exists
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/data/{{ group_names[0] }}"
+        state: directory
+        mode: '0755'
+
+    - name: Save output to local directory
+      ansible.builtin.copy:
+        content: "{{ aos_output.stdout[0] }}"
+        dest: "{{ playbook_dir }}/data/{{ group_names[0] }}/{{ ansible_host }}.{{ save_string }}"
+        mode: '0644'

@@ -1,0 +1,27 @@
+RUNMODE: dev
+WRITEMODE: false
+TESTWRITE: false # Use with WRITEMODE=true to show what would have been written
+HOST_WRITEMODE: true
+RETRIES: 3
+ALL_STUB: false
+COMMAND_STUB: false
+SNMP_STUB: false
+SP_STUB: false
+NC_STUB: false
+RELOAD_COMMAND: false
+CSV_FILE: "files/inventory_seed/{{ GH_FOLDER }}/inventory_seed.csv"
+AOSCX_REGEX: "JL724A|JL725A|JL726A|JL727A|JL728A|R8N85A|R8N86A|R8N87A|R8N88A|R8N89A|R8N85A|R8N86A|R8N87A|R8N88A|R8N89A|R9Y03A|R8Q72A|R8Q67A|R8Q68A|R8Q69A|R8Q70A|R8Q71A|Jl724B|JL725B|JL726B|JL727B|JL728B|S0M82A|S0M83A|S0M84A|S0M85A|JL658A|JL659A|JL660A|JL661A|JL662A|JL663A|JL664A|JL665A|JL666A|JL667A|JL668A|JL762A|R8S89A|R8S90A|R8S91A|R8S92A|S0E91A|S0X44A|CX6400|R9W94A|R9W95A|R9W96A|R9W97A"
+dummy_network_os: community.network.eric_eccli
+do_not_config_flag: false
+ansible_network_os: "{{ dummy_network_os }}"
+vlan_id: 399
+ansible_network_os_key: "{{ ansible_network_os | replace('.', '_') }}"
+remote_port_field:
+  arubanetworks_aoscx_aoscx: -4
+  community_network_aruba: -3
+rpf: "{{ remote_port_field[ansible_network_os_key] }}"
+override: false
+reload_delay: 20
+success: 'not set'
+failure_reason: 'None'
+warning: []

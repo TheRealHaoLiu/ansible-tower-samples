@@ -1,0 +1,78 @@
+---
+
+- name: Perform the pings
+  ansible.builtin.include_tasks: "{{ ansible_network_os }}/do_device_pings.yml"
+
+- name: Read stub data from yaml file
+  ansible.builtin.slurp:
+    src: "{{ playbook_dir }}/stub_data/{{ group_names[0] }}/{{ ansible_host }}.switch_ping_output.txt"
+  register: stub_data
+  when: COMMAND_STUB
+
+- name: Convert stub data to dictionary from yaml
+  set_fact:
+    ping_output: "{{ stub_data['content'] | b64decode | from_yaml }}"
+  when: COMMAND_STUB
+
+- name: debug
+  debug:
+    var: ping_output
+    verbosity: 2
+
+- name: Write the output to a file
+  ansible.builtin.copy:
+    content: "{{ ping_output | to_nice_yaml }}"
+    dest: "{{ playbook_dir }}/data/{{ group_names[0] }}/{{ ansible_host }}.switch_ping_output.txt"
+    mode: '0644'
+
+- name: Confirm ping success
+  debug:
+    msg: "Ping success to {{ ip_addr }}"
+  loop: "{{ ping_output.results }}"
+  loop_control:
+    label: "{{ ip_addr }}"
+  vars:
+    ip_addr: "{{ hostvars[item.item]['ansible_host'] }}"
+  when:
+    - ip_addr != ansible_host
+    # Lost a maximum of one packet
+    - item.stdout[0] is search('[4-5]\s*(packets)?\s*received')
+
+- name: Warn if ping failure  but do not fail
+  debug:
+    msg: "Ping failure to {{ ip_addr }}"
+  loop: "{{ ping_output.results }}"
+  loop_control:
+    label: "{{ ip_addr }}"
+  vars:
+    ip_addr: "{{ hostvars[item.item]['ansible_host'] }}"
+  when:
+    - ip_addr != ansible_host
+    - not item.stdout[0] is search('[4-5]\s*(packets)?\s*received')
+
+- name: Set warning flag if ping failure
+  ansible.builtin.set_fact:
+    warning: "{{ warning + ['Ping failure to ' + ip_addr ] }}"
+  loop: "{{ ping_output.results }}"
+  loop_control:
+    label: "{{ ip_addr }}"
+  vars:
+    ip_addr: "{{ hostvars[item.item]['ansible_host'] }}"
+  when:
+    - ip_addr != ansible_host
+    - not item.stdout[0] is search('[4-5]\s*(packets)?\s*received')
+
+- name: Add warning to report
+  ansible.builtin.shell: |
+    sed -i '/warnings:/d' {{ this_host_report_path }}/{{ this_yaml_report_name }}
+    echo "    warnings: {{ (warning + ['Ping failure to ' + ip_addr ]) | join(', ') }}" >> {{ this_host_report_path }}/{{ this_yaml_report_name }}
+  loop: "{{ ping_output.results }}"
+  loop_control:
+    label: "{{ ip_addr }}"
+  vars:
+    ip_addr: "{{ hostvars[item.item]['ansible_host'] }}"
+    this_host_report_path: "{{ hostvars[item.item]['host_report_path'] }}"
+    this_yaml_report_name: "{{ hostvars[item.item]['yaml_report_name'] }}"
+  when:
+    - ip_addr != ansible_host
+    - not item.stdout[0] is search('[4-5]\s*(packets)?\s*received')

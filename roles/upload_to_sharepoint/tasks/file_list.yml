@@ -1,0 +1,34 @@
+- name: Debug FPATH
+  ansible.builtin.debug:
+    msg: "File list is {{ FPATH }}"
+    verbosity: 2
+
+- name: Upload Files to Sharepoint
+  upload_to_sp:
+    file_path: "{{ item }}"
+    sp_server: "{{ SP_SERVER }}"
+    sp_site_url: "{{ SP_SITE_URL }}"
+    sp_folder: "flat_networks_project/{{ GH_FOLDER }}"
+    sp_subfolder: "{{ item | regex_replace('.*/data/([A-Za-z0-9]+)/.*', '\\1') }}"
+    sp_user: "{{ SHAREPOINT_USER }}"
+    sp_pass: "{{ SHAREPOINT_PW }}"
+  loop: "{{ FPATH }}"
+  register: sp_result
+  retries: "{{ SP_RETRIES }}"
+  delay: "{{ SP_DELAY }}"
+  no_log: true
+  when: not SP_STUB
+
+# - name: Debug sp_result
+#   ansible.builtin.debug:
+#     msg: "{{ sp_result }}"
+#     verbosity: 2
+#   when: not SP_STUB
+
+- name: Output to screen instead of Sharepoint
+  debug:
+    msg:
+      - "Would have uploaded to Sharepoint: {{ item }}"
+      - "{{ lookup('file', item) | split('\n') }}"
+  loop: "{{ FPATH }}"
+  when: SP_STUB

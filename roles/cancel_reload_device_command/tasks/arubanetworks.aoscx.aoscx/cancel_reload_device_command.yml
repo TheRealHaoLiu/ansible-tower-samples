@@ -1,0 +1,23 @@
+---
+
+- name: Cancel reset
+  arubanetworks.aoscx.aoscx_command:
+    commands:
+      - "checkpoint auto confirm"
+    wait_for:
+      - "result[0] contains {{ cancel_confirmation1 }}"
+      - "result[0] contains {{ cancel_confirmation2 }}"
+    match: "any"
+  vars:
+    cancel_confirmation1: "cannot create duplicate checkpoint"
+    cancel_confirmation2: "checkpoint [A-Z0-9]+ created"
+  register: aoscx_cancel_output
+
+- name: Debug aoscx_cancel_output
+  ansible.builtin.debug:
+    var: aoscx_cancel_output
+    verbosity: 2
+
+- name: INFO that device reboot is cancelled
+  ansible.builtin.debug:
+    msg: "INFO: Config reset has been cancelled"

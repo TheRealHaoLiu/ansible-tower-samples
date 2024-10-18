@@ -1,0 +1,73 @@
+---
+
+
+- name: Fetch from Github and populate inventory_seed dir
+  block:
+    - name: Set branch name
+      ansible.builtin.set_fact:
+        BRANCH: "{{ BRANCHES[RUNMODE] }}"
+
+    - name: Debug branch name
+      ansible.builtin.debug:
+        msg: "Github branch of inventory_seed is {{ BRANCH }}"
+
+    - name: Fetch latest commit SHA for the branch
+      ansible.builtin.uri:
+        url: "{{ GITHUB_URL }}/api/v3/repos/{{ GH_OWNER }}/{{ GH_REPO }}/commits/{{ BRANCH }}"
+        headers:
+          Authorization: "Bearer {{ GH_TOKEN }}"
+        method: GET
+        return_content: true
+        validate_certs: false
+      register: latest_commit_result
+
+    # Assert latest_commit_result.status == 200
+    - name: Verify latest_commit_result.status == 200
+      ansible.builtin.assert:
+        that:
+          - latest_commit_result.status == 200
+        success_msg: "Status code 200 received for branch {{ BRANCH }}"
+        fail_msg: "Status code {{ latest_commit_result.status }} received for branch {{ BRANCH }}. Aborting."
+
+    - name: Parse latest commit SHA
+      ansible.builtin.set_fact:
+        latest_commit_sha: "{{ latest_commit_result.json.sha }}"
+
+    - name: Fetch repository contents for the latest commit
+      ansible.builtin.uri:
+        url: "{{ GITHUB_URL }}/{{ GH_OWNER }}/{{ GH_REPO }}/archive/{{ latest_commit_sha }}.zip"
+        dest: "files/{{ GH_REPO }}_latest.zip"
+        headers:
+          Authorization: "Bearer {{ GH_TOKEN }}"
+        validate_certs: false
+
+    - name: Recursively remove old inventory_seed directory
+      ansible.builtin.file:
+        path: files/inventory_seed
+        state: absent
+
+    - name: Recreate the directory
+      ansible.builtin.file:
+        path: files/inventory_seed
+        state: directory
+        mode: '0755'
+
+    - name: Touch a 'keep' file in inventory_seed directory for git preservation
+      ansible.builtin.file:
+        path: files/inventory_seed/keep
+        state: touch
+        mode: u=rw,g=r,o=r
+
+    - name: Extract downloaded zip for the latest commit
+      ansible.builtin.unarchive:
+        src: "files/{{ GH_REPO }}_latest.zip"
+        dest: "files"
+      delegate_to: localhost
+
+    - name: Copy contents of git inventory_seed directory to final destination
+      ansible.builtin.copy:
+        src: "files/{{ GH_REPO }}-{{ latest_commit_sha }}/"
+        dest: "files/inventory_seed/"
+        mode: '0644'
+      when: latest_commit_result.status == 200
+      delegate_to: localhost

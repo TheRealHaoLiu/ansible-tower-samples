@@ -1,0 +1,20 @@
+---
+
+- name: Run checkpoint auto command - AOS-CX
+  arubanetworks.aoscx.aoscx_command:
+    commands:
+      - "checkpoint auto {{ reload_delay }}"
+    wait_for:
+      - "result[0] contains {{ confirmation }}"
+  vars:
+    confirmation: "Auto checkpoint mode expires in {{ reload_delay }} minute(s)"
+  register: aoscx_reload_output
+
+- name: Debug aoscx_reload_output
+  ansible.builtin.debug:
+    var: aoscx_reload_output
+    verbosity: 2
+
+- name: WARN that device reboot is set to occur
+  ansible.builtin.debug:
+    msg: "WARNING: Device is set to revert to earlier config in {{ reload_delay }} minutes"

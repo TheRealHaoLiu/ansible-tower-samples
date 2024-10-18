@@ -1,0 +1,72 @@
+- name: Standard behavior block
+  block:
+
+    - name: Run commands on remote devices - AOS CX Switch
+      arubanetworks.aoscx.aoscx_command:
+        commands:
+          - "no pag"
+          - "{{ device_command }}"
+        # host: "{{ ansible_host }}"
+        # username: "{{ ansible_user }}"
+        # password: "{{ ansible_password }}"
+      register: aoscx_output
+      until:
+        - "'stdout' in aoscx_output"
+        - "aoscx_output.stdout[1] | length > 0"
+        - "aoscx_output.stdout[1] != 'None'"
+      retries: 5
+      delay: 5
+
+    - name: Verify output is not just an ssh failed message
+      ansible.builtin.assert:
+        that:
+          - not ("ssh connection failed" in aoscx_output.stdout[0])
+        fail_msg: "Connection failed. Aborting."
+        success_msg: "Connection succeeded"
+
+  when: not COMMAND_STUB
+
+- name: Stub behavior block
+  block:
+
+    - name: Get stub data
+      ansible.builtin.slurp:
+        src: "{{ playbook_dir }}/stub_data/{{ group_names[0] }}/{{ ansible_host }}.{{ save_string }}"
+      register: stub_data
+
+    - name: Set stub data to variable
+      set_fact:
+        aoscx_output:
+          stdout:
+            - "stub_data"
+            - "{{ stub_data['content'] | b64decode }}"
+          stdout_lines:
+            - "stub_data"
+            - "{{ stub_data['content'] | b64decode | split('\n') }}"
+
+  when: COMMAND_STUB
+
+- name: Final block
+  block:
+
+    - name: Command Output - AOS CX
+      ansible.builtin.debug:
+        msg: "{{ aoscx_output.stdout_lines[1] }}"
+        verbosity: 1
+
+    - name: Save a variable
+      set_fact:
+        last_command_stdout: "{{ aoscx_output.stdout[1] }}"
+        last_command_stdout_lines: "{{ aoscx_output.stdout_lines[1] }}"
+
+    - name: Ensure output directory exists
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/data/{{ group_names[0] }}"
+        state: directory
+        mode: '0755'
+
+    - name: Save output to local directory
+      ansible.builtin.copy:
+        content: "{{ aoscx_output.stdout[1] }}"
+        dest: "{{ playbook_dir }}/data/{{ group_names[0] }}/{{ ansible_host }}.{{ save_string }}"
+        mode: '0644'

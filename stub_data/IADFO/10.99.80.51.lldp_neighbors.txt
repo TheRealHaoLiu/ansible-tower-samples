@@ -1,0 +1,20 @@
+LLDP Neighbor Information 
+=========================
+
+Total Neighbor Entries          : 10
+Total Neighbor Entries Deleted  : 6605
+Total Neighbor Entries Dropped  : 0
+Total Neighbor Entries Aged-Out : 6605
+
+LOCAL-PORT  CHASSIS-ID         PORT-ID                      PORT-DESC                    TTL      SYS-NAME    
+-----------------------------------------------------------------------------------------------------------
+1/1/9       e0:4f:43:98:19:31  e0:4f:43:98:19:31                                         3601                                        
+1/1/10      64:e8:81:cc:8d:40  1/1/2                        1/1/2                        120      IADFOS52                           
+1/1/15      98:fa:9b:0b:14:b9  98:fa:9b:0b:14:b9                                         3601                                        
+1/1/18      98:fa:9b:24:15:58  98:fa:9b:24:15:58                                         3601                                        
+1/1/20      00:a0:a4:2d:a5:07  00:a0:a4:2d:a5:07                                         3601                                        
+1/1/23      f8:ce:72:15:c1:89  f8:ce:72:15:c1:89                                         3601                                        
+1/1/25      e8:80:88:e6:1d:06  e8:80:88:e6:1d:06                                         3601                                        
+1/1/27      84:a9:38:4c:97:fa  84:a9:38:4c:97:fa                                         3601                                        
+1/1/29      84:a9:38:51:4d:32  84:a9:38:51:4d:32                                         3601                                        
+1/1/31      f8:ce:72:15:c4:11  f8:ce:72:15:c4:11                                         3601

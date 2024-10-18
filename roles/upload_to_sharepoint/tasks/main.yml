@@ -1,0 +1,9 @@
+---
+
+- name: Upload individual file
+  ansible.builtin.include_tasks: file_name.yml
+  when: FTYPE | default("file") == "file"
+
+- name: Upload list of files
+  ansible.builtin.include_tasks: file_list.yml
+  when: FTYPE | default("file") == "list"

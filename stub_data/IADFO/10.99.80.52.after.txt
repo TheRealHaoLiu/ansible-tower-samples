@@ -1,0 +1,279 @@
+Current configuration:
+!
+!Version ArubaOS-CX ML.10.04.1000
+!export-password: default
+hostname IADFOS52
+banner motd #
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! This system, which includes the data stored herein, is      !
+! proprietary and confidential to Marriott International, Inc.!
+!(Marriott). This system is for Marriott authorized personnel !
+! only. Unauthorized access is prohibited and will be         !
+! prosecuted to the full extent of applicable law.            !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ #
+user admin group administrators password ciphertext AQBapZYs7Fr1qjO2yy16fHgEPtnMs+524qf+3pRRSHt3AmkbYgAAAKOUXfZ46tpnIkgw8L/H69+d8EwSHRdFzHNTBmjk4mJxA7BUCGDcgUROh/kXwUjR91SHaKO9jicPnELz8qdH2vOOhZ5IrGhxdOMtzP33pUPtMtJLuRoFYSUZZ2/msup2T5V8
+user gnocadmin group administrators password ciphertext AQBapTTFF3Pj2Rj5DW8Q7liMKGKrDK0eeBUFKD4kgK13wxOOYgAAAOjI6O5P9jlbcd4LsCo8a96Kpf5a6SE7ckwNKCxmw4Sp0r3t+t7WCPg54i5wbDIz7bCagqo8sgjLuHjPNamoK58+qvJg7kpjUzpBA1OP4i7XAEtqnZC0DtbVZvrkjANgwMnY
+user scan group administrators password ciphertext AQBapUgnWymMWnZsY3K0nAyU+DGVU8RDzrwkhx5HT4hA7C5uYgAAAAU2swxde8mkHbeH70kQ+U7U8yvFODkZx0n41iwJKfdhZxzBwQ1+wb70zxGvkHB7wb5kKcgTgsOJGquAmZsIYlVav5WoiwAyjWR3F0udpPWYls2dLDYqfv2kJHXoqoTt8OW9
+clock timezone us/eastern
+loop-protect re-enable-timer 60
+sflow
+sflow collector 10.48.35.51 port 2055
+sflow agent-ip 10.48.38.51
+sflow sampling 1000
+sflow polling 20
+ntp server 162.130.132.124
+ntp enable
+cli-session
+    timeout 15
+!
+!
+tacacs-server timeout 50
+!
+!
+tacacs-server host 162.130.146.67 key ciphertext AQBapXUF1kpU4GG3rNVMzVi0ncSmfoevDlGPvivC9dBGCeznBwAAAImU407K7jw=
+tacacs-server host 10.224.254.56 key ciphertext AQBapXUF1kpU4GG3rNVMzVi0ncSmfoevDlGPvivC9dBGCeznBwAAAImU407K7jw=
+!
+radius-server host 162.130.146.67 key ciphertext AQBapRAQxhCgpg+d4TcMaInvVb8gY2OJaegMcVhcQUZuO/oUCQAAAJb8Ypd+0SHKfQ==
+aaa authentication allow-fail-through
+aaa authentication login console group tacacs local
+aaa authentication login ssh group tacacs local
+aaa authorization commands console group tacacs local
+aaa authorization commands ssh group tacacs local
+aaa accounting all-mgmt console start-stop group tacacs
+aaa accounting all-mgmt ssh start-stop group tacacs
+aaa accounting port-access stop-only group tacacs
+!
+radius dyn-authorization enable
+!
+radius dyn-authorization client 162.130.146.67 replay-protection enable time-window 60
+logging flowreplicators.marriott.com
+logging facility local0
+snmp-server vrf default
+snmp-server vrf mgmt
+snmp-server system-description Aruba JL724A
+snmp-server system-location Courtyard By Marriott Fairfax Fair Oaks
+snmp-server system-contact Property GM
+snmp-server community FZQ6cmRO
+snmp-server community PD6TE9RW
+snmp-server host 10.224.10.70 trap version v2c community PD6TE9RW 
+snmp-server host 162.130.104.16 trap version v2c community FZQ6cmRO 
+snmp-server host 162.130.146.60 trap version v2c community PD6TE9RW 
+ssh server vrf default
+ssh server vrf mgmt
+vsf member 1 
+    type jl724a
+!
+!
+!
+!
+!
+access-list ip SSH_SNMP
+    10 comment SSH Allowed
+    20 comment MI VPN Subnets
+    30 permit tcp 10.2.0.0/255.255.0.0 any eq 22 log count
+    40 permit tcp 10.3.0.0/255.255.0.0 any eq 22 log count
+    50 permit tcp 10.5.0.0/255.255.0.0 any eq 22 log count
+    60 permit tcp 10.6.0.0/255.255.0.0 any eq 22 log count
+    70 permit tcp 10.7.0.0/255.255.0.0 any eq 22 log count
+    80 permit tcp 10.8.0.0/255.255.0.0 any eq 22 log count
+    90 permit tcp 10.9.0.0/255.255.0.0 any eq 22 log count
+    100 comment IADFO Subnets
+    110 permit tcp 10.99.80.0/255.255.252.0 any eq 22 log count
+    120 comment MARRNET
+    130 permit tcp 162.130.0.0/255.255.0.0 any eq 22 log count
+    140 comment Accenture
+    150 permit tcp 159.166.13.0/255.255.255.240 any eq 22 log count
+    160 permit tcp 159.166.29.0/255.255.255.240 any eq 22 log count
+    170 comment Ansible Dev
+    180 permit tcp 10.82.108.0/255.255.255.0 any eq 22 log count
+    190 comment Ansible-Forescout Prod-East
+    200 permit tcp 10.212.244.0/255.255.255.192 any eq 22 log count
+    210 permit tcp 10.212.244.64/255.255.255.192 any eq 22 log count
+    220 permit tcp 10.212.244.128/255.255.255.192 any eq 22 log count
+    230 comment Ansible-Forescout Prod-West
+    240 permit tcp 10.213.166.0/255.255.255.192 any eq 22 log count
+    250 permit tcp 10.213.166.64/255.255.255.192 any eq 22 log count
+    260 permit tcp 10.213.166.128/255.255.255.192 any eq 22 log count
+    270 comment Forescout NAC
+    280 permit tcp 10.9.236.0/255.255.255.128 any eq 22 log count
+    290 permit tcp 10.224.15.0/255.255.255.128 any eq 22 log count
+    300 permit tcp 10.225.129.128/255.255.255.128 any eq 22 log count
+    310 comment *Forescout AWS subnets*
+    320 permit tcp 10.215.128.0/255.255.255.0 any eq 22 log count
+    330 permit tcp 10.215.161.0/255.255.255.0 any eq 22 log count
+    340 permit tcp 10.216.156.32/255.255.255.224 any eq 22 log count
+    350 comment AZ-US-East-1 AVD (AZES1) any eq 22 log count
+    360 permit tcp 172.28.128.0/255.255.224.0 any eq 22 log count
+    370 permit tcp 172.28.9.0/255.255.255.0 any eq 22 log count
+    380 comment AZ-US-West-1 AVD (AZWS1) any eq 22 log count
+    390 permit tcp 172.29.128.0/255.255.224.0 any eq 22 log count
+    400 permit tcp 172.29.18.0/255.255.255.0 any eq 22 log count
+    410 comment AZ-Japan-East-1 AVD (AZJE1) any eq 22 log count
+    420 permit tcp 172.31.160.0/255.255.224.0 any eq 22 log count
+    430 comment AZ-Asia-South-1 AVD (AZSA1) any eq 22 log count
+    440 permit tcp 172.31.64.0/255.255.224.0 any eq 22 log count
+    450 comment AZ-UK-South-1 AVD (AZSK1) any eq 22 log count
+    460 permit tcp 10.214.0.0/255.255.240.0 any eq 22 log count
+    470 comment AZ-UK-West-1 AVD (AZWK1) any eq 22 log count
+    480 permit tcp 10.214.128.0/255.255.240.0 any eq 22 log count
+    490 comment ** Thycotic PAM **
+    590 permit tcp 172.25.16.0/255.255.255.0 any eq 22 log count
+    600 permit tcp 172.25.211.0/255.255.255.0 any eq 22 log count
+    610 permit tcp 172.25.203.0/255.255.255.0 any eq 22 log count
+    620 comment SNMP Read Only Access
+    630 comment HP Openview Network Node Manager Backup
+    640 permit udp 162.130.114.45 any eq 161 log count
+    650 comment MAARK Security Compliance Monitoring
+    660 permit udp 162.130.114.209 any eq 161 log count
+    670 comment LNXP0086 MAARK1 Network Collector
+    680 permit udp 162.130.122.125 any eq 161 log count
+    690 comment MAARK Security Compliance Monitoring
+    700 permit udp 162.130.122.213 any eq 161 log count
+    710 comment LNXP0044 MAARK1 Network Crawler
+    720 permit udp 162.130.128.92 any eq 161 log count
+    730 comment MAARK Security Compliance Monitoring
+    740 permit udp 162.130.131.43 any eq 161 log count
+    750 comment HP Openview Network Node Manager
+    760 permit udp 162.130.131.178 any eq 161 log count
+    770 comment MCNC VLAN 104 Enterprise NetMgt
+    780 permit udp 162.130.104.0/255.255.255.192 any eq 161 log count
+    790 comment MCNC VLAN 108 Network Tools
+    800 permit udp 162.130.108.0/255.255.255.0 any eq 161 log count
+    810 comment IAD CLOUD Network Tools
+    820 permit udp 10.226.104.0/255.255.255.0 any eq 161 log count
+    830 comment SJC CLOUD Network Tools
+    900 permit udp 10.225.96.0/255.255.255.0 any eq 161 log count
+    910 permit udp 172.27.16.68 any eq 161 log count
+    920 comment SNMP Read Write Access
+    930 comment Infoblox NetMRI
+    940 permit udp 162.130.104.30 any eq 161 log count
+    950 permit udp 162.130.104.49 any eq 161 log count
+    960 permit udp 162.130.104.50 any eq 161 log count
+    970 permit udp 162.130.104.51 any eq 161 log count
+    980 permit udp 162.130.104.52 any eq 161 log count
+    990 permit udp 162.130.104.53 any eq 161 log count
+    1000 permit udp 162.130.104.54 any eq 161 log count
+    1010 permit udp 162.130.104.62 any eq 161 log count
+    1020 comment Firemon
+    1030 permit udp 162.130.104.72 any eq 161 log count
+    1040 permit udp 162.130.104.73 any eq 161 log count
+    1050 comment Forescout NAC
+    1060 permit udp 10.9.236.0/255.255.255.128 any eq 161 log count
+    1070 permit udp 10.224.15.0/255.255.255.128 any eq 161 log count
+    1080 permit tcp 10.225.129.128/255.255.255.128 any eq 161 log count
+    1090 comment Forescout-Ansible new AWS subnets
+    1100 permit udp 10.213.166.0/255.255.255.0 any eq 161 log count
+    1110 permit udp 10.215.128.0/255.255.255.0 any eq 161 log count
+    1120 permit udp 10.215.161.0/255.255.255.0 any eq 161 log count
+    1130 permit udp 10.212.244.0/255.255.255.0 any eq 161 log count
+    1140 permit tcp 10.216.156.32/255.255.255.224 any eq 161 log count
+    1150 comment Ansible Dev
+    1160 permit udp 10.82.108.0/255.255.255.0 any eq 161 log count
+    9000 comment SSH Block
+    9010 deny tcp any 10.99.80.52 eq 22 log count
+    9020 comment SNMP Block
+    9030 deny udp any 10.99.80.52 eq 161 log count
+    10000 permit any any any
+apply access-list ip SSH_SNMP control-plane vrf default
+dhcpv4-snooping
+dhcpv4-snooping authorized-server 10.48.38.51
+dhcpv4-snooping authorized-server 10.99.80.52
+vlan 1
+spanning-tree
+interface mgmt
+    no shutdown
+    ip dhcp
+interface 1/1/1 
+    no shutdown
+    vlan access 1
+interface 1/1/2 
+    no shutdown
+    vlan access 1
+interface 1/1/3 
+    no shutdown
+    vlan access 1
+interface 1/1/4 
+    no shutdown
+    vlan access 1
+interface 1/1/5 
+    no shutdown
+    vlan access 1
+interface 1/1/6 
+    no shutdown
+    vlan access 1
+interface 1/1/7 
+    no shutdown
+    vlan access 1
+interface 1/1/8 
+    no shutdown
+    vlan access 1
+interface 1/1/9 
+    no shutdown
+    vlan access 1
+interface 1/1/10 
+    no shutdown
+    vlan access 1
+interface 1/1/11 
+    no shutdown
+    vlan access 1
+interface 1/1/12 
+    no shutdown
+    vlan access 1
+interface 1/1/13 
+    no shutdown
+    vlan access 1
+interface 1/1/14 
+    no shutdown
+    vlan access 1
+interface 1/1/15 
+    no shutdown
+    vlan access 1
+interface 1/1/16 
+    no shutdown
+    vlan access 1
+interface 1/1/17 
+    no shutdown
+    vlan access 1
+interface 1/1/18 
+    no shutdown
+    vlan access 1
+interface 1/1/19 
+    no shutdown
+    vlan access 1
+interface 1/1/20 
+    no shutdown
+    vlan access 1
+interface 1/1/21 
+    no shutdown
+    vlan access 1
+interface 1/1/22 
+    no shutdown
+    vlan access 1
+interface 1/1/23 
+    no shutdown
+    vlan access 1
+interface 1/1/24 
+    no shutdown
+    vlan access 1
+interface 1/1/25 
+    no shutdown
+    vlan access 1
+interface 1/1/26 
+    no shutdown
+    vlan access 1
+interface 1/1/27 
+    no shutdown
+    vlan access 1
+interface 1/1/28 
+    no shutdown
+    vlan access 1
+interface vlan1 
+    ip address 10.99.80.52/23
+    no ip dhcp
+ip route 0.0.0.0/0 10.99.80.1
+ip dns domain-name marriott.com
+ip dns server-address 162.130.10.9
+ip dns server-address 162.130.128.97
+no https-server vrf default
+no https-server vrf mgmt

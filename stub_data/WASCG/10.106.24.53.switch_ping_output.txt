@@ -1,0 +1,50 @@
+changed: false
+msg: All items completed
+results:
+-   ansible_loop_var: item
+    changed: false
+    false_condition: hostvars[item].ansible_host != ansible_host
+    item: WASCGS03
+    skip_reason: Conditional result was False
+    skipped: true
+-   ansible_loop_var: item
+    changed: false
+    failed: false
+    invocation:
+        module_args:
+            commands:
+            - ping 10.106.24.54 repetitions 5
+            host: null
+            interval: 1
+            match: all
+            password: null
+            port: null
+            retries: 10
+            ssh_keyfile: null
+            timeout: null
+            username: null
+            wait_for: null
+    item: WASCGS01
+    stdout:
+    - '10.106.24.54 is alive, iteration 1, time = 3 ms
+
+        10.106.24.54 is alive, iteration 2, time = 3 ms
+
+        10.106.24.54 is alive, iteration 3, time = 5 ms
+
+        10.106.24.54 is alive, iteration 4, time = 2 ms
+
+        10.106.24.54 is alive, iteration 5, time = 2 ms
+
+        5 packets transmitted, 5 packets received, 0% packet loss
+
+        round-trip (ms) min/avg/max = 2/3/5'
+    stdout_lines:
+    -   - 10.106.24.54 is alive, iteration 1, time = 3 ms
+        - 10.106.24.54 is alive, iteration 2, time = 3 ms
+        - 10.106.24.54 is alive, iteration 3, time = 5 ms
+        - 10.106.24.54 is alive, iteration 4, time = 2 ms
+        - 10.106.24.54 is alive, iteration 5, time = 2 ms
+        - 5 packets transmitted, 5 packets received, 0% packet loss
+        - round-trip (ms) min/avg/max = 2/3/5
+skipped: false

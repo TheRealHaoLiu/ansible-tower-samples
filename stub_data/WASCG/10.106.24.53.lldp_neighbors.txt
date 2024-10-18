@@ -1,0 +1,9 @@
+LLDP Remote Devices Information
+
+  LocalPort | ChassisId          PortId             PortDescr SysName           
+  --------- + ------------------ ------------------ --------- ------------------
+  1         | 90 20 c2 a2 90 c0  16                 16        WASCGS01          
+  5         | 54 05 db f9 60 8c  54 05 db f9 60 8c                              
+  6         | 54 05 db f1 57 b2  54 05 db f1 57 b2                              
+  20        | 98 fa 9b 1c ad 51  98 fa 9b 1c ad 51                              
+  22        | 98 fa 9b 17 ed 4b  98 fa 9b 17 ed 4b

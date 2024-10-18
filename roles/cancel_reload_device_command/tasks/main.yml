@@ -1,0 +1,10 @@
+---
+
+- name: Cancel reload switch command
+  ansible.builtin.include_tasks: "{{ ansible_network_os }}/cancel_reload_device_command.yml"
+  when: not COMMAND_STUB
+
+- name: Cancel reload switch command - Stub Mode
+  when: COMMAND_STUB
+  ansible.builtin.debug:
+    msg: "Reload command pseudo-cancelled!"

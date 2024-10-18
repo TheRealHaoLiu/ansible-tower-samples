@@ -1,0 +1,10 @@
+PING 10.96.36.46 (10.96.36.46) 56(84) bytes of data.
+64 bytes from 10.96.36.46: icmp_seq=1 ttl=54 time=115 ms
+64 bytes from 10.96.36.46: icmp_seq=2 ttl=54 time=144 ms
+64 bytes from 10.96.36.46: icmp_seq=3 ttl=54 time=61.3 ms
+64 bytes from 10.96.36.46: icmp_seq=4 ttl=54 time=166 ms
+64 bytes from 10.96.36.46: icmp_seq=5 ttl=54 time=78.5 ms
+
+--- 10.96.36.46 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4198ms
+rtt min/avg/max/mdev = 61.344/112.928/165.934/38.990 ms

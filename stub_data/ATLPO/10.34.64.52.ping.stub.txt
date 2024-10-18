@@ -1,0 +1,10 @@
+PING 10.34.64.52 (10.34.64.52) 56(84) bytes of data.
+64 bytes from 10.34.64.52: icmp_seq=1 ttl=245 time=73.7 ms
+64 bytes from 10.34.64.52: icmp_seq=2 ttl=245 time=99.3 ms
+64 bytes from 10.34.64.52: icmp_seq=3 ttl=245 time=77.4 ms
+64 bytes from 10.34.64.52: icmp_seq=4 ttl=245 time=94.4 ms
+64 bytes from 10.34.64.52: icmp_seq=5 ttl=245 time=82.8 ms
+
+--- 10.34.64.52 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4007ms
+rtt min/avg/max/mdev = 73.685/85.504/99.271/9.824 ms

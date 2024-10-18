@@ -1,0 +1,10 @@
+PING 10.99.80.51 (10.99.80.51) 56(84) bytes of data.
+64 bytes from 10.99.80.51: icmp_seq=1 ttl=54 time=65.9 ms
+64 bytes from 10.99.80.51: icmp_seq=2 ttl=54 time=63.4 ms
+64 bytes from 10.99.80.51: icmp_seq=3 ttl=54 time=49.0 ms
+64 bytes from 10.99.80.51: icmp_seq=4 ttl=54 time=56.2 ms
+64 bytes from 10.99.80.51: icmp_seq=5 ttl=54 time=52.9 ms
+
+--- 10.99.80.51 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4011ms
+rtt min/avg/max/mdev = 49.014/57.466/65.882/6.335 ms

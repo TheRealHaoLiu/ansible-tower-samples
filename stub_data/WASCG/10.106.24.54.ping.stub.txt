@@ -1,0 +1,10 @@
+PING 10.106.24.54 (10.106.24.54) 56(84) bytes of data.
+64 bytes from 10.106.24.54: icmp_seq=1 ttl=245 time=164 ms
+64 bytes from 10.106.24.54: icmp_seq=2 ttl=245 time=65.7 ms
+64 bytes from 10.106.24.54: icmp_seq=3 ttl=245 time=49.1 ms
+64 bytes from 10.106.24.54: icmp_seq=4 ttl=245 time=51.10 ms
+64 bytes from 10.106.24.54: icmp_seq=5 ttl=245 time=52.0 ms
+
+--- 10.106.24.54 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4010ms
+rtt min/avg/max/mdev = 49.111/76.647/164.443/44.276 ms

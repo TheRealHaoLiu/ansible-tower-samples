@@ -1,0 +1,957 @@
+- name: Deflatten switch networks - main
+  hosts: all
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+
+    - name: Main block
+      block:
+
+        - name: Set stats
+          ansible.builtin.set_stats:
+            data:
+              main_playbook_success: false # Until proven otherwise
+              job_id: "{{ tower_job_id | default('') }}"
+            aggregate: false
+            per_host: false
+          run_once: true
+
+        - name: Bail when previous template did not create inventory
+          ansible.builtin.fail:
+            msg: "Inventory wasn't created by previous template. Aborting."
+          when:
+            - not inv_creation_success | default(false)
+            - not override
+
+        - name: Debug with timestamp
+          ansible.builtin.debug:
+            msg: "Playbook started: {{ now(utc=true, fmt='%Y-%m-%d %H:%M:%S') }}"
+          run_once: True
+          tags:
+            - always
+
+        - name: ALL_STUB mode
+          ansible.builtin.set_fact:
+            COMMAND_STUB: true
+            SNMP_STUB: true
+            SP_STUB: true
+            NC_STUB: true
+          when: ALL_STUB
+          tags:
+            - always
+
+        - name: Set HOST_WRITEMODE to false if do_not_config_flag is set
+          ansible.builtin.set_fact:
+            HOST_WRITEMODE: false
+          when: do_not_config_flag
+          tags:
+            - always
+
+        - name: Set variable names for report paths
+          ansible.builtin.set_fact:
+            # group_report_path: "{{ playbook_dir }}/data/{{ group_names[0] }}"
+            host_report_path: "{{ playbook_dir }}/data/{{ group_names[0] }}/report"
+            host_data_path: "{{ playbook_dir }}/data/{{ group_names[0] }}"
+            stub_data_path: "{{ playbook_dir }}/stub_data/{{ group_names[0] }}"
+            yaml_report_name: "{{ ansible_host }}.report.yml"
+          tags:
+            - always
+
+        - name: Ensure group directory for switch reports exist
+          ansible.builtin.file:
+            path: "{{ playbook_dir }}/data/{{ group_names[0] }}/report"
+            state: directory
+            mode: '0755'
+          tags:
+            - always
+
+        - name: Generate individual switch reports
+          ansible.builtin.template:
+            src: report.j2
+            dest: "{{ host_report_path }}/{{ yaml_report_name }}"
+          tags:
+            - always
+
+        - name: Add do_not_config flag to report
+          ansible.builtin.shell: |
+            echo "    do_not_config: {{ do_not_config_flag }}" >> {{ host_report_path }}/{{ yaml_report_name }}
+          tags:
+            - always
+
+        - name: Ping switches from localhost
+          ansible.builtin.import_role:
+            name: do_local_pings
+          vars:
+            save_string: before
+          tags:
+            - do_local_pings
+
+        - name: SNMP block
+          block:
+            - name: Get SNMP data
+              ansible.builtin.import_role:
+                name: do_snmp
+
+            - name: Set snmp_facts to dictionary when SNMP_STUB
+              ansible.builtin.set_fact:
+                snmp_facts:
+                  sysname: "{{ sysname }}"
+                  sysdescr: "{{ sysdescr }}"
+                  lldpLocSysDesc: "{{ lldpLocSysDesc }}"
+              when: SNMP_STUB
+
+            - name: Output data to file
+              ansible.builtin.copy:
+                content: "{{ snmp_facts | to_nice_json }}"
+                dest: "{{ host_data_path }}/{{ ansible_host }}.snmp.txt"
+                mode: '0644'
+              when:
+                - snmp_facts is defined
+
+            - name: Upload SNMP Files to Sharepoint
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.snmp.txt"
+                FTYPE: "file"
+              tags:
+                - upload_to_sp
+              when:
+                - snmp_facts is defined
+
+            # Modified for new_test_many branch
+            - name: Set system_hostname to inventory_hostname
+              ansible.builtin.set_fact:
+                system_hostname: "{{ inventory_hostname }}"
+
+            - name: Debug sysname, sysdescr, and lldpLocSysDesc
+              ansible.builtin.debug:
+                msg:
+                  - "sysname: {{ sysname }}"
+                  - "sysdescr: {{ sysdescr }}"
+                  - "lldpLocSysDesc: {{ lldpLocSysDesc }}"
+
+            - name: Fail if neither sysdescr nor lldpLocSysDesc is defined
+              ansible.builtin.fail:
+                msg: "Failed to get data from SNMP"
+              when:
+                - lldpLocSysDesc is not defined or lldpLocSysDesc | length == 0
+                - sysdescr is not defined or sysdescr | length == 0
+
+            - name: Set ansible_network_os based on lldpLocSysDesc
+              ansible.builtin.set_fact:
+                ansible_network_os: "arubanetworks.aoscx.aoscx"
+              changed_when: true
+              when:
+                - lldpLocSysDesc is defined
+                - "lldpLocSysDesc is search(AOSCX_REGEX)"
+
+            - name: Set ansible_network_os based on lldpLocSysDesc
+              ansible.builtin.set_fact:
+                ansible_network_os: "community.network.aruba"
+              # Commented out until we have a regex for AOS
+              # when: >
+              #   not lldpLocSysDesc is search('^.*<identifier_1>.*$') and
+              #   not lldpLocSysDesc is search('^.*<identifier_2>.*$')
+              changed_when: true
+              when:
+                - lldpLocSysDesc is defined
+                - "not lldpLocSysDesc is search(AOSCX_REGEX)"
+
+            - name: Set ansible_network_os based on sysdescr if lldpLocSysDesc is not defined
+              ansible.builtin.set_fact:
+                ansible_network_os: "arubanetworks.aoscx.aoscx"
+              when:
+                - lldpLocSysDesc is not defined
+                - "sysdescr is search(AOSCX_REGEX)"
+
+            - name: Set ansible_network_os based on sysdescr if lldpLocSysDesc is not defined
+              ansible.builtin.set_fact:
+                ansible_network_os: "community.network.aruba"
+              when:
+                - lldpLocSysDesc is not defined
+                - "not sysdescr is search(AOSCX_REGEX)"
+
+            - name: Verify that snmp was received
+              ansible.builtin.assert:
+                that:
+                  - "{{ ansible_network_os != dummy_network_os }}"
+                  - "{{ system_hostname != 'unknown' }}"
+                fail_msg: "Failed to get data from SNMP"
+
+            - name: Debug the path used for snmp success report
+              ansible.builtin.debug:
+                msg: "SNMP success will be written to {{ host_report_path }}/{{ yaml_report_name }}"
+
+            - name: Put snmp success in report
+              ansible.builtin.shell: |
+                echo "    snmp: success" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+          rescue:
+
+            - name: Debug the path used for snmp failure report
+              ansible.builtin.debug:
+                msg: "SNMP failure will be written to {{ host_report_path }}/{{ yaml_report_name }}"
+
+            - name: Put snmp failure in report
+              ansible.builtin.shell: |
+                echo "    snmp: failed" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Put failure_reason in report
+              ansible.builtin.shell: |
+                echo "    failure_reason: snmp_failure" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Put success=false in report
+              ansible.builtin.shell: |
+                echo "    success: false" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Set success flag and failure_reason
+              ansible.builtin.set_fact:
+                success: false
+                failure_reason: snmp_failure
+
+            - name: Fail the play
+              ansible.builtin.fail:
+                msg: "Failed to get data from SNMP"
+
+          tags:
+            - do_snmp
+
+        - name: Output switch information
+          ansible.builtin.debug:
+            msg:
+              - "inventory_hostname: {{ inventory_hostname }}"
+              - "system_hostname: {{ system_hostname }}"
+              - "ansible_host: {{ ansible_host }}"
+              - "ansible_network_os: {{ ansible_network_os | default('unknown') }}"
+              - "group: {{ group_names | difference(['all', 'ungrouped']) }}"
+          tags:
+            - always
+
+        - name: Put additional switch info into report
+          ansible.builtin.shell: |
+            echo "    switch_name: {{ system_hostname }}" >> {{ host_report_path }}/{{ yaml_report_name }}
+            echo "    switch_os: {{ ansible_network_os | default('unknown') }}" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+        - name: Check SSH version
+          ansible.builtin.import_role:
+            name: check_ssh_version
+
+        - name: Set network device credentials - read-only
+          ansible.builtin.set_fact:
+            ansible_user: "{{ NETDEV_CREDS[RUNMODE]['read-only']['NETDEV_USER'] }}"
+            ansible_password: "{{ NETDEV_CREDS[RUNMODE]['read-only']['NETDEV_PW'] }}"
+          no_log: true
+          when:
+            - not WRITEMODE or
+              not HOST_WRITEMODE
+          tags:
+            - device_credentials
+
+        - name: Set network device credentials - read-write
+          ansible.builtin.set_fact:
+            ansible_user: "{{ NETDEV_CREDS[RUNMODE]['read-write']['NETDEV_USER'] }}"
+            ansible_password: "{{ NETDEV_CREDS[RUNMODE]['read-write']['NETDEV_PW'] }}"
+          no_log: true
+          when:
+            - WRITEMODE
+            - HOST_WRITEMODE
+          tags:
+            - device_credentials
+
+        - name: Get show version output
+          ansible.builtin.import_role:
+            name: get_command
+          vars:
+            device_command: "show version"
+            save_string: version.txt
+          tags:
+            - gather_configs
+
+        - name: If version info contains the string 'Aruba\\S*CX', set show_version_os to "arubanetworks.aoscx.aoscx"
+          ansible.builtin.set_fact:
+            show_version_os: "arubanetworks.aoscx.aoscx"
+          tags:
+            - gather_configs
+          when:
+            - "{{ last_command_stdout is search('Aruba\\S*CX') }}"
+
+        - name: If version info does not contain the string 'Aruba\\S*CX', set show_version_os to "community.network.aruba"
+          ansible.builtin.set_fact:
+            show_version_os: "community.network.aruba"
+          tags:
+            - gather_configs
+          when:
+            - "{{ not last_command_stdout is search('Aruba\\S*CX') }}"
+
+        - name: If switch model is not correct, warn the user
+          ansible.builtin.debug:
+            msg:
+              - "WARNING: Switch model derived from snmp does not match model from 'show version'"
+          when:
+            - show_version_os != ansible_network_os
+
+        - name: Put warning in report if switch model is not correct
+          ansible.builtin.shell: |
+            echo "    warning: 'model types do not match'" >> {{ host_report_path }}/{{ yaml_report_name }}
+          when:
+            - show_version_os != ansible_network_os
+
+        - name: Get configurations for potential rollback
+          ansible.builtin.import_role:
+            name: get_command
+          vars:
+            device_command: "show running-config"
+            save_string: before.txt
+          tags:
+            - gather_configs
+
+        - name: Upload old configuration to Sharepoint
+          ansible.builtin.include_role:
+            name: upload_to_sharepoint
+          vars:
+            FPATH: "{{ host_data_path }}/{{ ansible_host }}.before.txt"
+            FTYPE: "file"
+          tags:
+            - upload_to_sp
+
+        - name: LLDP block
+          block:
+            - name: Enable LLDP on switch (AOS)
+              ansible.builtin.import_role:
+                name: write_configs
+              vars:
+                command_list:
+                  - "lldp run"
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - ansible_network_os == "community.network.aruba"
+                - HOST_WRITEMODE
+
+            - name: Enable LLDP on switch (AOSCX)
+              ansible.builtin.import_role:
+                name: write_configs
+              vars:
+                command_list:
+                  - "lldp"
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - ansible_network_os == "arubanetworks.aoscx.aoscx"
+                - HOST_WRITEMODE
+
+            - name: Verify device is still pingable from localhost
+              ansible.builtin.import_role:
+                name: do_local_pings
+              vars:
+                save_string: after_lldp
+              tags:
+                - do_local_pings
+
+            - name: Get lldp neighbor output (AOSCX)
+              ansible.builtin.import_role:
+                name: get_command
+              vars:
+                device_command: "show lldp neighbor-info"
+                save_string: lldp_neighbors.txt
+              when:
+                - ansible_network_os == "arubanetworks.aoscx.aoscx"
+
+            - name: Get lldp neighbor output (AOS)
+              ansible.builtin.import_role:
+                name: get_command
+              vars:
+                device_command: "show lldp info remote-device"
+                save_string: lldp_neighbors.txt
+              when:
+                - ansible_network_os == "community.network.aruba"
+
+            - name: Upload LLDP Files to Sharepoint
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.lldp_neighbors.txt"
+                FTYPE: "file"
+              tags:
+                - upload_to_sp
+
+            - name: Debug lldp neighbors
+              ansible.builtin.debug:
+                msg: "{{ last_command_stdout_lines }}"
+                verbosity: 2
+
+            - name: Verify that lldp output contains title string
+              ansible.builtin.assert:
+                that:
+                  - "last_command_stdout_lines is search(matchstring)"
+                fail_msg: "lldp command output error"
+              vars:
+                matchstring: "(Neighbor|Devices) Information"
+
+            - name: Parse lldp table for lines with switch names
+              ansible.builtin.set_fact:
+                lldp_match_lines: "{{ lldp_match_lines | default([]) + [{'match_lines': (last_command_stdout_lines | select('match', '.*\\b' ~ hostname_abbrev ~ post_hostname_regex) | list), 'remote_host': hostname}] }}"
+              loop: "{{ groups[group_names[0]] | difference(inventory_hostname) }}"
+              vars:
+                hostname: "{{ hostvars[item].system_hostname }}"
+                hostname_abbrev: "{{ hostname[:15] }}"
+                post_hostname_regex: "{{ '[\\S]*[\\s.]*$' if hostname | length >= 15 else '[\\s.]*$' }}"
+              when: hostname != "unknown"
+
+            - name: Debug lldp_match_lines
+              ansible.builtin.debug:
+                msg: "{{ lldp_match_lines }}"
+                verbosity: 2
+
+            - name: Parse lines for interface numbers
+              ansible.builtin.set_fact:
+                lldp_interface_numbers: "{{ lldp_interface_numbers | default([]) + [lldp_dict] }}"
+              loop: "{{ lldp_match_lines }}"
+              vars:
+                fields:  "{{ item.match_lines[0] | trim | regex_replace('\\s+', ' ') | split(' ') }}"
+                lldp_dict:
+                  hostname: "{{ system_hostname }}"
+                  local_port: "{{ fields[0] }}"
+                  remote_host: "{{ item.remote_host }}"
+                  remote_port: "{{ fields[rpf] }}"
+              when: item.match_lines | length > 0
+
+            - name: Debug lldp_interface_numbers
+              ansible.builtin.debug:
+                msg: "{{ lldp_interface_numbers | default('No lldp_interface_numbers dict') }}"
+
+            - name: Check if lldp_interface_numbers is defined and not empty
+              ansible.builtin.fail:
+                msg: "No LLDP neighbors found"
+              when:
+                - not lldp_interface_numbers is defined or
+                  lldp_interface_numbers | length == 0
+
+            - name: Write lldp_interface_numbers to file
+              ansible.builtin.copy:
+                content: "{{ lldp_interface_numbers | to_nice_yaml }}"
+                dest: "{{ host_data_path }}/{{ ansible_host }}.lldp_interface_numbers.txt"
+                mode: '0644'
+
+            - name: Upload LLDP Interface Numbers to Sharepoint
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.lldp_interface_numbers.txt"
+                FTYPE: "file"
+              tags:
+                - upload_to_sp
+
+          tags:
+            - get_lldp_neighbors
+
+          rescue:
+            - name: Put failure_reason in report
+              ansible.builtin.shell: |
+                echo "    failure_reason: get_lldp_neighbors_failed" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Put success=false in report
+              ansible.builtin.shell: |
+                echo "    success: false" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Set success flag and failure_reason
+              ansible.builtin.set_fact:
+                success: false
+                failure_reason: get_lldp_neighbors_failed
+
+            - name: Fail the play
+              ansible.builtin.fail:
+                msg: "Failed to get lldp neighbors"
+
+        - name: Gather existing device VLANS for AOSCX (only)
+          block:
+
+            - name: Get VLAN configurations to determine if it needs to be added
+              ansible.builtin.include_role:
+                name: get_command
+              vars:
+                device_command: "show int {{ item.local_port }}"
+                save_string: "interface_output_{{item.hostname}}_{{item.local_port | replace('/', '-') }}.txt"
+              loop: "{{ lldp_interface_numbers }}"
+
+            - name: Find interface files for {{ inventory_hostname }}
+              ansible.builtin.find:
+                paths: "{{ playbook_dir }}/data/{{ group_names[0] }}"
+                patterns: "{{ inventory_hostname }}.interface_output*.txt"
+              register: file_data_list
+
+            - ansible.builtin.debug:
+                var: file_data_list
+
+            - ansible.builtin.set_fact:
+                interface_data: []
+
+            - ansible.builtin.set_fact:
+                interface_data: "{{ interface_data + (file_content | parse_cli_textfsm('./templates/textfsm/aruba_aoscx_show_interface.textfsm')) }}"
+              loop: "{{ file_data_list.files }}"
+              vars:
+                file_content: "{{ lookup('file', item.path) }}"
+
+            - ansible.builtin.debug:
+                var: interface_data
+
+          tags:
+            - gather_existing_vlans
+          when:
+            - ansible_network_os == "arubanetworks.aoscx.aoscx"
+
+          rescue:
+            - name: Put failure_reason in report
+              ansible.builtin.shell: |
+                echo "    failure_reason: gather_existing_vlans_failed" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Put success=false in report
+              ansible.builtin.shell: |
+                echo "    success: false" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Set success flag and failure_reason
+              ansible.builtin.set_fact:
+                success: false
+                failure_reason: gather_existing_vlans_failed
+
+            - name: Fail the play if gather_existing_vlans fails
+              ansible.builtin.fail:
+                msg: "Failed to gather existing vlans"
+
+
+        - name: Create config for each device
+          block:
+            - name: Create configuration from template
+              ansible.builtin.template:
+                src: "{{ ansible_network_os }}/config.j2"
+                dest: "{{ host_data_path }}/{{ ansible_host }}.new.txt"
+
+            - name: Create configuration from template part 2 for aoscx
+              ansible.builtin.template:
+                src: "{{ ansible_network_os }}/config-part-2.j2"
+                dest: "{{ host_data_path }}/{{ ansible_host }}.new-part-2.txt"
+              when: ansible_network_os == "arubanetworks.aoscx.aoscx"
+
+            - name: Upload new configuration file to SP
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                  FPATH: "{{ host_data_path }}/{{ ansible_host }}.new.txt"
+                  FTYPE: "file"
+              tags:
+                - upload_to_sp
+
+            - name: Upload new aoscx configuration file to SP
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                  FPATH: "{{ host_data_path }}/{{ ansible_host }}.new-part-2.txt"
+                  FTYPE: "file"
+              tags:
+                - upload_to_sp
+              when: ansible_network_os == "arubanetworks.aoscx.aoscx"
+
+          tags:
+            - create_configs
+          when:
+            - lldp_interface_numbers | length > 0
+
+        - name: Configuration push block
+          block:
+            - name: Do write memory before changing anything
+              ansible.builtin.import_role:
+                name: write_configs
+              vars:
+                SAVE_CONFIG: true
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+
+            - name: If there is a reload_command tag, set vars to true
+              ansible.builtin.set_fact:
+                RELOAD_COMMAND: true
+              when:
+                - ('reload_command_all' in ansible_run_tags) or
+                  (ansible_network_os == 'community.network.aruba' and 'reload_command_aos' in ansible_run_tags) or
+                  (ansible_network_os == 'arubanetworks.aoscx.aoscx' and 'reload_command_aoscx' in ansible_run_tags)
+
+            - name: Debug RELOAD_COMMAND
+              ansible.builtin.debug:
+                msg: >-
+                  {% if RELOAD_COMMAND %}
+                  RELOAD is ON
+                  {% else %}
+                  RELOAD is OFF
+                  {% endif %}
+
+            - name: Set reload timer for safety
+              ansible.builtin.import_role:
+                name: reload_device_command
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - RELOAD_COMMAND
+
+            - name: Write "reload timer set" to report
+              ansible.builtin.shell: |
+                echo "    reload_timer_set: true" >> {{ host_report_path }}/{{ yaml_report_name }}
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - RELOAD_COMMAND
+
+            - name: Wait for 30 seconds before pushing configuration
+              ansible.builtin.wait_for:
+                timeout: 30
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Debug FPATH and data
+              ansible.builtin.debug:
+                msg:
+                  - "FPATH: {{ FPATH }}"
+                  - "{{ lookup('file', FPATH) }}"
+                verbosity: 3
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.new.txt"
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+
+            - name: Push configuration to device - AOS
+              ansible.builtin.import_role:
+                name: write_configs
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.new.txt"
+                command_list: "{{ lookup('file', FPATH) | split('\n') }}"
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == "community.network.aruba"
+
+            - name: Get the space-separated first command set for AOSCX
+              ansible.builtin.set_fact:
+                first_command_set: "{{ lookup('file', FPATH) | split_on_empty_lines }}"
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.new.txt"
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Debug first_command_set
+              ansible.builtin.debug:
+                var: first_command_set
+                verbosity: 3
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Push first configuration to device - AOSCX
+              ansible.builtin.include_role:
+                name: write_configs
+              vars:
+                command_list: "{{ next_command_set | split('\n') }}"
+              loop: "{{ first_command_set }}"
+              loop_control:
+                index_var: my_index
+                loop_var: next_command_set
+                label: "command set {{ my_index }}"
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Debug FPATH and data for part-2
+              ansible.builtin.debug:
+                msg:
+                  - "FPATH: {{ FPATH }}"
+                  - "{{ lookup('file', FPATH) }}"
+                verbosity: 3
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.new-part-2.txt"
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Get the space-separated second command set for AOSCX
+              ansible.builtin.set_fact:
+                second_command_set: "{{ lookup('file', FPATH) | split_on_empty_lines }}"
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.new-part-2.txt"
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Debug second_command_set
+              ansible.builtin.debug:
+                var: second_command_set
+                verbosity: 3
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Push second configuration to device - AOSCX
+              ansible.builtin.include_role:
+                name: write_configs
+              vars:
+                command_list: "{{ next_command_set | split('\n') }}"
+              loop: "{{ second_command_set }}"
+              loop_control:
+                index_var: my_index
+                loop_var: next_command_set
+                label: "command set {{ my_index }}"
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - ansible_network_os == 'arubanetworks.aoscx.aoscx'
+
+            - name: Wait for 30 seconds
+              ansible.builtin.wait_for:
+                timeout: 30
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+
+            - name: Verify device is still pingable from localhost
+              ansible.builtin.import_role:
+                name: do_local_pings
+              vars:
+                save_string: after
+              tags:
+                - do_local_pings
+
+            - name: Write interfaces configured to report
+              ansible.builtin.shell: |
+                echo "    interfaces: [{{ lldp_interface_numbers | map(attribute='local_port') | join(',') }}]" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+            - name: Cancel reload
+              ansible.builtin.import_role:
+                name: cancel_reload_device_command
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - RELOAD_COMMAND
+
+            - name: Write "reload timer cancelled" to report
+              ansible.builtin.shell: |
+                echo "    reload_timer_cancelled: true" >> {{ host_report_path }}/{{ yaml_report_name }}
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+                - RELOAD_COMMAND
+
+            - name: Do write memory
+              ansible.builtin.import_role:
+                name: write_configs
+              vars:
+                SAVE_CONFIG: true
+              tags:
+                - push_configs
+              when:
+                - WRITEMODE
+                - HOST_WRITEMODE
+
+          when:
+            - (WRITEMODE and HOST_WRITEMODE) or override
+
+        - name: Deflatten switch networks - Collect post data block
+          block:
+            - name: Get configurations for post-data
+              ansible.builtin.import_role:
+                name: get_command
+              vars:
+                device_command: "show running-config"
+                save_string: after.txt
+              tags:
+                - gather_configs
+
+            - name: Upload new configuration to Sharepoint
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.after.txt"
+                FTYPE: "file"
+              tags:
+                - upload_to_sp
+
+            - name: Create diff
+              ansible.builtin.import_role:
+                name: create_diff
+              vars:
+                BFILE: "{{ host_data_path }}/{{ ansible_host }}.before.txt"
+                AFILE: "{{ host_data_path }}/{{ ansible_host }}.after.txt"
+                DFILE: "{{ host_data_path }}/{{ ansible_host }}.diff.txt"
+              tags:
+                - create_diff
+
+            - name: Upload diff to Sharepoint
+              ansible.builtin.import_role:
+                name: upload_to_sharepoint
+              vars:
+                FPATH: "{{ host_data_path }}/{{ ansible_host }}.diff.txt"
+                FTYPE: "file"
+              tags:
+                - upload_to_sp
+
+          tags:
+            - gather_post_data
+
+        - name: Put failure_reason blank in report
+          ansible.builtin.shell: |
+            echo "    failure_reason: ''" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+        - name: Put success=true in report
+          ansible.builtin.shell: |
+            echo "    success: true" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+        - name: Set success flag to true
+          ansible.builtin.set_fact:
+            success: true
+
+        - name: Create artifact on success
+          ansible.builtin.set_stats:
+            data:
+              main_playbook_success: true
+              task_result:
+                job_succeeded: true
+            per_host: false
+            aggregate: false
+          run_once: true
+
+      # Run report aggregation tasks even if something failed
+      always:
+
+        - name: Final reporting block
+          run_once: true
+          tags: always
+          block:
+
+            - name: Add warnings to report
+              ansible.builtin.shell: |
+                echo "    warnings: {{ host_warning | join(', ') | default('None', true) }}" >> {{ host_host_report_path }}/{{ host_yaml_report_name }}
+              loop: "{{ groups | dict2items | rejectattr('key', 'match', 'all|ungrouped') | map(attribute='value') | flatten }}"
+              vars:
+                host_warning: "{{ hostvars[item].warning }}"
+                host_host_report_path: "{{ hostvars[item].host_report_path }}"
+                host_yaml_report_name: "{{ hostvars[item].yaml_report_name }}"
+
+            - name: Aggregate individual reports into group reports
+              ansible.builtin.assemble:
+                src: "{{ playbook_dir }}/data/{{ item }}/report"
+                dest: "{{ playbook_dir }}/data/{{ item }}/group_report.yml"
+              loop: "{{ groups | difference(['all', 'ungrouped']) }}"
+
+            - name: Insert string 'switches:' at BOF
+              ansible.builtin.shell: |
+                sed -i '1i switches:' {{ playbook_dir }}/data/{{ item }}/group_report.yml
+              loop: "{{ groups | difference(['all', 'ungrouped']) }}"
+
+            - name: Delete blank lines in report
+              ansible.builtin.shell: |
+                sed -i '/^$/d' {{ playbook_dir }}/data/{{ item }}/group_report.yml
+              loop: "{{ groups | difference(['all', 'ungrouped']) }}"
+
+            - name: Convert YAML report to CSV
+              yaml_to_csv:
+                yaml_file_path: "{{ playbook_dir }}/data/{{ item }}/group_report.yml"
+                csv_file_path: "{{ playbook_dir }}/data/{{ item }}/group_report.csv"
+                outer_key: switches
+              loop: "{{ groups | difference(['all', 'ungrouped']) }}"
+
+            - name: Use shell find command to find report files to upload
+              ansible.builtin.shell: |
+                find {{ playbook_dir }}/data -type f -name '*report.csv' -o -name '*report.yml'
+              register: report_files
+              tags:
+                - find_report_files
+
+            - name: Condense report_files into a list
+              ansible.builtin.set_fact:
+                report_files_list: "{{ report_files.stdout_lines }}"
+              tags:
+                - find_report_files
+
+            - name: Upload reports to Sharepoint
+              ansible.builtin.include_role:
+                name: upload_to_sharepoint
+              vars:
+                FPATH: "{{ report_files_list }}"
+                FTYPE: "list"
+              register: reports_upload
+              tags:
+                - upload_to_sp
+
+            - name: Create display var for success attribute for each host
+              ansible.builtin.set_fact:
+                entries: >
+                  {% for host in (groups | dict2items | rejectattr('key', 'match', 'all|ungrouped') | map(attribute='value') | flatten) %}
+                    {{ '%-10s'|format(hostvars[host]['group_names'][0]) }} : {{ '%-20s'|format(host) }} : {{ '%-20s'|format(hostvars[host].system_hostname) }} : {{ '%-10s'|format(hostvars[host].success) }} : {{ '%-20s'|format(hostvars[host].failure_reason) }} : {{ '%-20s'|format(hostvars[host].warning | join(', ') | default('None', true)) }}
+                  {% endfor %}
+
+            - name: Display success status for each host
+              ansible.builtin.debug:
+                var: entry_list
+              vars:
+                header_1: "{{ ['%-13s'|format('Site') ~ '%-23s'|format('IP') ~ '%-23s'|format('Hostname') ~ '%-13s'|format('Success') ~ '%-23s'|format('Failure Reason') ~ '%-23s'|format('Warning')] }}"
+                header_2: "{{ [ '-' * 104 ] }}"
+                entry_list: "{{ header_1 + header_2 + (entries | split('\n') | reject('match', '^\\s*$') | map('trim') | list | sort(attribute='1')) }}"
+
+            - name: Debug with timestamp
+              ansible.builtin.debug:
+                msg: "Playbook finished: {{ now(utc=true, fmt='%Y-%m-%d %H:%M:%S') }}"
+              run_once: True
+              tags:
+                - always
+
+            - name: Merge reports on Sharepoint
+              merge_reports:
+                sp_server: "{{ SP_SERVER }}"
+                sp_site_url: "{{ SP_SITE_URL }}"
+                sp_user: "{{ SHAREPOINT_USER }}"
+                sp_pass: "{{ SHAREPOINT_PW }}"
+              register: sp_result
+              when: not SP_STUB
+              timeout: 300
+              tags:
+                - merge_reports
+              # no_log: true
+
+            - name: Set url of report files
+              ansible.builtin.set_fact:
+                project_url: "{{ base_url }}/{{ GH_FOLDER }}"
+                all_report_url: "{{ base_url }}/all_reports.csv"
+              tags:
+                - always
+              vars:
+                base_url: https://marriottonline.sharepoint.com/sites/NetDevOpsFileshare/Shared%20Documents/flat_networks_project
+
+            - name: Debug the report urls
+              ansible.builtin.debug:
+                msg:
+                  - "{{ GH_FOLDER }} Reports: {{ project_url }}"
+                  - "Merged Report: {{ all_report_url }}"
+              tags:
+                - always

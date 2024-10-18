@@ -1,0 +1,9 @@
+- name: Load config on to device using aruba_config
+  ansible.builtin.debug:
+    var: command_list
+  when: command_list | reject('regex', '^[\\s!]*$') | length > 0
+
+- name: Debug when command_list is empty
+  ansible.builtin.debug:
+    msg: "Command_list is empty. Not pushing config."
+  when: command_list | reject('regex', '^[\\s!]*$') | length == 0

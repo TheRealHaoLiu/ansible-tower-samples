@@ -1,0 +1,5 @@
+  - switch_ip: {{ ansible_host }}
+    date: {{ now(utc=true, fmt='%Y-%m-%d %H:%M:%S') }}
+    marsha: {{ group_names[0] }}
+    project: {{ GH_FOLDER }}
+    job_id: {{ job_id}}

@@ -1,0 +1,8 @@
+  - switch_ip: 10.106.24.52
+    date: 2024-08-15 21:03:19
+    marsha: WASCG
+    project: test-WASCG
+    ping_before: success
+    snmp: success
+    switch_name: WASCGS02
+    switch_os: community.network.aruba

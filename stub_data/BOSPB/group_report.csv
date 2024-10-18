@@ -1,0 +1,5 @@
+date,project,switch_ip,switch_name,switch_os,marsha,ping_before,snmp,ping_after_lldp,ping_after,interfaces,reload_timer_set,reload_timer_cancelled
+2024-08-16 14:13:27,pilot1-1_BOSPB,10.96.36.45,BOSPBS045,arubanetworks.aoscx.aoscx,BOSPB,success,success,success,no_data,no_data,no_data,no_data
+2024-08-16 14:13:27,pilot1-1_BOSPB,10.96.36.46,BOSPBS046,arubanetworks.aoscx.aoscx,BOSPB,success,success,success,no_data,no_data,no_data,no_data
+2024-08-16 14:13:27,pilot1-1_BOSPB,10.96.36.47,BOSPBS047,arubanetworks.aoscx.aoscx,BOSPB,success,success,success,no_data,no_data,no_data,no_data
+2024-08-16 14:13:27,pilot1-1_BOSPB,10.96.36.51,BOSPBS051,arubanetworks.aoscx.aoscx,BOSPB,success,success,success,no_data,no_data,no_data,no_data

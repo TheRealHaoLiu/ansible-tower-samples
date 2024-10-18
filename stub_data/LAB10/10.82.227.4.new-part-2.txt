@@ -1,0 +1,12 @@
+
+
+!
+interface 1/1/1
+  description CL-LAN:10.82.227.2.LAB10:1/1/2:[SWITCH]
+  vlan trunk allowed 399
+!
+interface 1/1/1
+  description CL-LAN:10.82.227.2.LAB10:1/1/2:[SWITCH]
+  vlan trunk allowed 399
+!
+end

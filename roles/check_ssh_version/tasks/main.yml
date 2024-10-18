@@ -1,0 +1,48 @@
+- name: Run nc command to check SSH version
+  shell: echo ~ | nc {{ ansible_host }} 22
+  register: ssh_version_output
+  when: not NC_STUB
+
+- name: Parse SSH version
+  set_fact:
+    ssh_version: "{{ ssh_version_output.stdout_lines[0] }}"
+  when: not NC_STUB
+
+- name: Get stub data
+  ansible.builtin.slurp:
+    src: "{{ playbook_dir }}/stub_data/{{ group_names[0] }}/{{ ansible_host }}.ssh_ver.txt"
+  register: stub_data
+  when: NC_STUB
+
+- name: Get SSH version from stub data
+  set_fact:
+    ssh_version: "{{ stub_data['content'] | b64decode | trim }}"
+  when: NC_STUB
+
+- name: Display SSH version
+  debug:
+    msg: "The SSH version for {{ ansible_host }} is: {{ ssh_version }}"
+
+- name: Add SSH version to report
+  ansible.builtin.shell: |
+    echo "    ssh_version: {{ ssh_version }}" >> {{ host_report_path }}/{{ yaml_report_name }}
+
+- name: Put failure_reason in report if SSH version is not v2
+  ansible.builtin.shell: |
+    echo "    failure_reason: ssh_version" >> {{ host_report_path }}/{{ yaml_report_name }}
+  when: ssh_version[:5] != "SSH-2"
+
+- name: Put success=false in report if SSH version is not v2
+  ansible.builtin.shell: |
+    echo "    success: false" >> {{ host_report_path }}/{{ yaml_report_name }}
+  when: ssh_version[:5] != "SSH-2"
+
+- name: Set success flag and failure_reason
+  ansible.builtin.set_fact:
+    success: false
+    failure_reason: ssh_version
+  when: ssh_version[:5] != "SSH-2"
+
+- name: Fail if SSH version is not v2
+  ansible.builtin.meta: end_host
+  when: ssh_version[:5] != "SSH-2"

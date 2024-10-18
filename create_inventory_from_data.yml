@@ -1,0 +1,36 @@
+---
+# Used as part of AAP workflow.
+
+- name: Create AAP inventory using survey data
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    RUNMODE: prod
+
+  tasks:
+
+    - name: Set job_success to false until proven otherwise
+      ansible.builtin.set_stats:
+        data:
+          task_result:
+            job_succeeded: false # Until proven otherwise
+          inv_creation_success: false
+          job_id: "{{ tower_job_id | default('') }}"
+          ticket: "{{ ticket | default('') }}"
+        per_host: false
+        aggregate: false
+
+    - name: Create the inventory from the AAP Survey
+      ansible.builtin.import_role:
+        name: create_inventory_from_data
+      tags:
+        - create_inventory
+
+    - name: Create artifact on success
+      ansible.builtin.set_stats:
+        data:
+          inv_creation_success: true
+          inventory: "{{ INVENTORY_NAME }}"
+        per_host: false
+        aggregate: false

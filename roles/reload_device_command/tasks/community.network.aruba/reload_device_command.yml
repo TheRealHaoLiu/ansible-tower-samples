@@ -1,0 +1,31 @@
+- name: Run reload after command - Aruba (Procurve)
+  ansible.netcommon.cli_command:
+    command: "reload after {{ reload_delay }}"
+    prompt:
+      - "Do you want to continue [y/n]?"
+      - "Continue (y/n)?"
+      - "Confirm reload: yes/no?"
+      - ".*Are you sure.*"
+    answer: "y"
+  register: aos_reload_output
+  until: aos_reload_output is succeeded
+  retries: 3
+  delay: 10
+
+- name: Debug aos_reload_output
+  ansible.builtin.debug:
+    var: aos_reload_output
+    verbosity: 2
+
+- name: Verify that reload is scheduled
+  ansible.builtin.assert:
+    that:
+      - "match_string in aos_reload_output.stdout"
+    fail_msg: "Reload not scheduled"
+    success_msg: "Reload scheduled"
+  vars:
+    match_string: "Reload scheduled in 0 days, 0 hours, {{ reload_delay }} minutes"
+
+- name: WARN that device reload is set to occur
+  ansible.builtin.debug:
+    msg: "WARNING: Device is set to reload in {{ reload_delay }} minutes if not cancelled"

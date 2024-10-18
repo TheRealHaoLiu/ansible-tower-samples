@@ -1,0 +1,32 @@
+Interface 1/1/1 is up
+        Admin state is up
+        Link state: up for 10 minutes (since Wed Aug 14 14:25:40 EDT 2024)
+        Link transitions: 1
+        Description:
+        Hardware: Ethernet MAC Address: a4:0e:75:e1:0f:7f
+        MTU 1500
+        Type 1GbT
+        Full-duplex
+        qos trust none
+        Speed 1000 Mb/s
+        Auto-negotiation is on
+        Energy-Efficient Ethernet is disabled
+        Flow-control: off
+        Error-control: off
+        MDI mode: MDIX
+        VLAN Mode: access
+        Access VLAN: 1
+        Rx
+        477723 total packets            525438938 total bytes
+        476012   unicast packets
+        824   multicast packets
+        887   broadcast packets
+        0 errors                           0 dropped
+        0 CRC/FCS                          0 pause
+        Tx
+        460454 total packets             72628024 total bytes
+        456152   unicast packets
+        1981   multicast packets
+        2321   broadcast packets
+        0 errors                           0 dropped
+        0 collision                        0 pause

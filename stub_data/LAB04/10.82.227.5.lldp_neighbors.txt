@@ -1,0 +1,21 @@
+LLDP Neighbor Information 
+=========================
+
+Total Neighbor Entries          : 11
+Total Neighbor Entries Deleted  : 9
+Total Neighbor Entries Dropped  : 0
+Total Neighbor Entries Aged-Out : 9
+
+LOCAL-PORT  CHASSIS-ID         PORT-ID                      PORT-DESC                    TTL      SYS-NAME    
+-----------------------------------------------------------------------------------------------------------
+1/1/1       a4:0e:75:c6:d0:40  1/1/4                        CL-LAN:10.82.227.5.LAB04:1/1/1:[...  120      10.82.227.2.LAB04                          
+1/1/4       00:a0:a4:2c:4d:eb  00:a0:a4:2c:4d:eb                                         3601                                        
+1/1/7       00:a0:a4:2e:66:59  00:a0:a4:2e:66:59                                         3601                                        
+1/1/11      00:a0:a4:2c:47:45  00:a0:a4:2c:47:45                                         3601                                        
+1/1/22      9c:2d:cd:d2:03:12  9c:2d:cd:d2:03:12                                         3601                                        
+1/1/25      00:a0:a4:2c:46:21  00:a0:a4:2c:46:21                                         3601                                        
+1/1/27      f8:ce:72:14:c6:e9  f8:ce:72:14:c6:e9                                         3601                                        
+1/1/43      e8:80:88:a3:c0:7f  e8:80:88:a3:c0:7f                                         3601                                        
+1/1/45      e8:80:88:a3:c3:0f  e8:80:88:a3:c3:0f                                         3601                                        
+1/1/46      e8:80:88:16:ca:49  e8:80:88:16:ca:49                                         3601                                        
+1/1/48      44:5b:ed:3b:3e:00  1/1/1                        CL-LAN:10.82.227.5.LAB04:1/1/48:...  120      BOSPBS051

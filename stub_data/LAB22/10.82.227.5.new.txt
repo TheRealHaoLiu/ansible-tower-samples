@@ -1,0 +1,16 @@
+
+vlan 399
+!
+interface 1/1/1
+  vlan trunk native None
+!
+interface 1/1/48
+  vlan trunk native None
+!
+interface 1/1/1
+  vlan trunk native None
+!
+interface 1/1/48
+  vlan trunk native None
+!
+end

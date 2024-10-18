@@ -1,0 +1,6 @@
+---
+
+- name: Create the inventory from the survey data
+  ansible.builtin.import_tasks: create_inventory.yml
+  tags:
+    - create_inventory

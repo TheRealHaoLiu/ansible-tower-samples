@@ -1,0 +1,15 @@
+---
+
+ATLPO:
+  hosts:
+    10.34.64.51:
+      ansible_host: 10.34.64.51
+    10.34.64.52:
+      ansible_host: 10.34.64.52
+
+IADFO:
+  hosts:
+    10.99.80.51:
+      ansible_host: 10.99.80.51
+    10.99.80.52:
+      ansible_host: 10.99.80.52

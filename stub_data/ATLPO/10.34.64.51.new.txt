@@ -1,0 +1,7 @@
+vlan 399
+tagged 25
+!
+interface 25
+description UPLINK:ATLPOS02:25:[UPLINK]
+!
+end

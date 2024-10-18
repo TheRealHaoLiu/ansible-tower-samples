@@ -1,0 +1,13 @@
+Value LocalPort (\d+)
+Value ChassisId (\S+)
+Value PortId (\S+)
+Value PortDesc (\S+)
+Value SysName (\S+)
+
+Start
+  ^\s*LLDP Remote Devices Information -> LldpNeighbors
+
+LldpNeighbors
+  ^\s*LocalPort\s+\|\s+ChassisId\s+\|\s+PortId\s+PortDescr\s+SysName
+  ^\s*${LocalPort}\s+\|\s+${ChassisId}\s+\|\s+${PortId}\s+${PortDesc}\s+${SysName} -> Record
+  ^\s*$$ -> Start

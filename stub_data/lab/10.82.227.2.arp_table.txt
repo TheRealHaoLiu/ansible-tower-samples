@@ -1,0 +1,16 @@
+IPv4 Address     MAC                Port         Physical Port              State     
+--------------------------------------------------------------------------------------
+10.96.37.19      e8:80:88:a3:c6:21  vlan1        1/1/2                      reachable  
+10.96.37.140     e8:80:88:20:8e:c1  vlan1        1/1/2                      reachable  
+10.96.36.102     00:a0:a4:2c:46:01  vlan1        1/1/4                      reachable  
+10.96.37.84      e8:80:88:16:c0:6b  vlan1        1/1/32                     reachable  
+10.96.36.100     00:50:56:97:85:25  vlan1        1/1/23                     reachable  
+10.96.36.46      a4:0e:75:cb:68:00  vlan1        1/1/2                      reachable  
+10.96.36.47      a4:0e:75:e1:0f:40  vlan1        1/1/4                      reachable  
+10.96.37.58      9c:2d:cd:d2:03:12  vlan1        1/1/4                      reachable  
+10.96.36.51      44:5b:ed:3b:3e:00  vlan1        1/1/4                      reachable  
+10.96.36.1       ec:b9:07:0a:45:97  vlan1        1/1/1                      reachable  
+10.96.37.217     9c:2d:cd:b2:ec:3e  vlan1        1/1/2                      reachable  
+10.96.36.197     9c:2d:cd:d2:0b:cd  vlan1        1/1/5                      reachable  
+Total Number Of ARP Entries Listed- 12.
+------------------------------------------------------------------------------------------

@@ -1,0 +1,9 @@
+Image stamp:   
+ /ws/swbuildm/rel_ajanta_qaoff/code/build/lakes(swbuildm_rel_ajanta_qaoff_rel_aj
+anta)
+                Aug  4 2021 00:21:25
+                YA.16.10.0016
+                236
+Boot Image:     Primary
+
+Boot ROM Version:    YA.15.20

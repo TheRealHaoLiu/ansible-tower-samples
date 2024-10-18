@@ -1,0 +1,13 @@
+#jinja2: lstrip_blocks: True
+{% set port_list = lldp_interface_numbers | map(attribute='local_port') | list %}
+{% if '0' in (port_list | map('int') | map('string')) %}
+{% set port_list = port_list | map('string') | sort | list %}
+{% else %}
+{% set port_list = port_list | map('int') | sort | map('string') | list %}
+{% endif %}
+vlan {{ vlan_id }}
+   tagged {{ port_list | join(',') }}
+{% for item in lldp_interface_numbers %}
+interface {{ item.local_port }}
+   name CL-LAN:{{ item.remote_host }}:{{ item.remote_port }}:[SWITCH]
+{% endfor %}

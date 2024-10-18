@@ -1,0 +1,27 @@
+switches:
+  - switch_ip: 10.106.24.52
+    date: 2024-08-15 21:03:19
+    marsha: WASCG
+    project: test-WASCG
+    ping_before: success
+    snmp: success
+    switch_name: WASCGS02
+    switch_os: community.network.aruba
+  - switch_ip: 10.106.24.53
+    date: 2024-08-15 21:03:19
+    marsha: WASCG
+    project: test-WASCG
+    ping_before: success
+    snmp: success
+    switch_name: WASCGS03
+    switch_os: community.network.aruba
+    ping_after_lldp: success
+  - switch_ip: 10.106.24.54
+    date: 2024-08-15 21:03:19
+    marsha: WASCG
+    project: test-WASCG
+    ping_before: success
+    snmp: success
+    switch_name: WASCGS01
+    switch_os: community.network.aruba
+    ping_after_lldp: success

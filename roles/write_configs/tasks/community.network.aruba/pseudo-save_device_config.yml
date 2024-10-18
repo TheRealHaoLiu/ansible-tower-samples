@@ -1,0 +1,3 @@
+- name: Save config on device using aruba_config
+  ansible.builtin.debug:
+    msg: "Configuration pseudo-saved!"

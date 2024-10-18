@@ -1,0 +1,25 @@
+#jinja2: lstrip_blocks: True
+{% for interface in interface_data %}
+    {% set skip_interface = false %}
+    {% set vlan_list = [] %}
+    {% if interface.VLAN_ACCESS %}
+        {% set vlan_list = [vlan_id | string, interface.VLAN_ACCESS | string] %}
+    {% elif interface.VLAN_TRUNK %}
+        {% if vlan_id | string in interface.VLAN_TRUNK or 'all' in interface.VLAN_TRUNK %}
+            {% set skip_interface = true %}
+        {% else %}
+            {% set vlan_list = [vlan_id | string] + (interface.VLAN_TRUNK | map('string')) %}
+        {% endif %}
+    {% endif %}
+    {% if not skip_interface %}
+        {% set vlan_ids = vlan_list | unique | sort %}
+        {% set local_port = interface.INTERFACE %}
+        {% set lldp = lldp_interface_numbers | selectattr('local_port', 'equalto', local_port) | list | first %}
+        {% set remote_host = lldp.remote_host %}
+        {% set remote_port = lldp.remote_port %}
+interface {{ local_port }}
+    description CL-LAN:{{ remote_host }}:{{ remote_port }}:[SWITCH]
+    vlan trunk allowed {{ vlan_ids | join(',') }}
+
+    {% endif %}
+{% endfor %}

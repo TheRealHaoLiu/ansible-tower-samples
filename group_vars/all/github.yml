@@ -1,0 +1,7 @@
+BRANCHES:
+  dev: development
+  prod: development
+GITHUB_URL: https://git.marriott.com
+GH_OWNER: Network-DevOps
+GH_REPO: devops_inventory_seed
+GH_FOLDER: test_project

@@ -1,0 +1,12 @@
+
+
+!
+interface 1/1/1
+  description CL-LAN:BOSPBS047:1/1/48:[SWITCH]
+  vlan trunk allowed 399
+!
+interface 1/1/1
+  description CL-LAN:BOSPBS047:1/1/48:[SWITCH]
+  vlan trunk allowed 399
+!
+end

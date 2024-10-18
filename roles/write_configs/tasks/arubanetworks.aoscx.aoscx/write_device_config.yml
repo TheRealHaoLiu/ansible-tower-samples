@@ -1,0 +1,15 @@
+- name: Load config on to device using aoscx_config
+  arubanetworks.aoscx.aoscx_config:
+    commands: "{{ command_list }}"
+    replace: block
+    match: none
+    save_when: never
+  register: cfg_output_aoscx
+  until: cfg_output_aoscx.failed == false
+  retries: "{{ RETRIES }}"
+  when: command_list | reject('regex', '^[\\s!]*$') | length > 0
+
+- name: Debug when command_list is empty
+  ansible.builtin.debug:
+    msg: "Command_list is empty. Not pushing config."
+  when: command_list | reject('regex', '^[\\s!]*$') | length == 0

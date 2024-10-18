@@ -1,0 +1,40 @@
+---
+version: 3
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "--pre -c"
+
+dependencies:
+  ansible_core:
+    package_pip: ansible-core==2.16.3
+  ansible_runner:
+    package_pip: ansible-runner
+  python_interpreter:
+    package_system: "python311"
+    python_path: "/usr/bin/python3.11"
+  system:
+    - git [platform:rpm]
+    - vim-minimal [platform:rpm]
+    - diffutils [platform:rpm]
+    - unzip [platform:rpm]
+    - iputils [platform:rpm]
+  galaxy: deps/requirements.yml
+  python: deps/requirements.txt
+
+options:
+  package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+  append_base:
+    - RUN echo "[global]" >> /etc/pip.conf
+    - RUN echo "index-url=https://artifactory.marriott.com/artifactory/api/pypi/network-devops-pypi-local/simple/" >> /etc/pip.conf
+    - RUN echo "extra-index-url=https://pypi.org/simple/" >> /etc/pip.conf
+  prepend_builder:
+    - ENV PKGMGR_OPTS "--nodocs --setopt install_weak_deps=0"
+  append_final:
+    - RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+images:
+  base_image:
+    # name: docker.io/redhat/ubi8:latest
+    name: registry.access.redhat.com/ubi8/ubi-minimal:latest
